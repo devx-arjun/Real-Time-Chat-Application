@@ -100,15 +100,6 @@ class LinkUpSocket {
 
         const type = data.type;
 
-        /**
-         * Authentication succeeded.
-         *
-         * Backend response:
-         * {
-         *   type: "auth:success",
-         *   user: {...}
-         * }
-         */
         if (type === "auth:success") {
           this.authenticated = true;
 
@@ -129,9 +120,6 @@ class LinkUpSocket {
           return;
         }
 
-        /**
-         * Backend error message.
-         */
         if (type === "error") {
           const errorMessage =
             typeof data.message === "string" ? data.message : "WebSocket error";
@@ -145,18 +133,6 @@ class LinkUpSocket {
           return;
         }
 
-        /**
-         * Forward all other events to subscribers.
-         *
-         * Examples:
-         * message:new
-         * message:updated
-         * message:deleted
-         * message:reaction
-         * conversation:joined
-         * conversation:left
-         * pong
-         */
         this.messageListeners.forEach((listener) => {
           listener(data);
         });
@@ -184,11 +160,6 @@ class LinkUpSocket {
     };
   }
 
-  /**
-   * Disconnect intentionally.
-   *
-   * This disables automatic reconnect.
-   */
   disconnect() {
     this.manuallyDisconnected = true;
 
@@ -208,9 +179,6 @@ class LinkUpSocket {
     this.notifyConnection(false);
   }
 
-  /**
-   * Automatically reconnect after connection loss.
-   */
   private scheduleReconnect() {
     if (this.manuallyDisconnected || !this.guestId) {
       return;
@@ -235,9 +203,6 @@ class LinkUpSocket {
     }, delay);
   }
 
-  /**
-   * Send a message through the WebSocket.
-   */
   private send(payload: SocketPayload) {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       console.warn("WebSocket is not connected");
@@ -249,11 +214,6 @@ class LinkUpSocket {
     return true;
   }
 
-  /**
-   * Join a conversation.
-   *
-   * The backend requires authentication before this works.
-   */
   joinConversation(conversationId: string) {
     if (!conversationId) {
       return false;
@@ -276,9 +236,6 @@ class LinkUpSocket {
     });
   }
 
-  /**
-   * Leave a conversation.
-   */
   leaveConversation(conversationId: string) {
     if (!conversationId) {
       return false;
@@ -296,17 +253,6 @@ class LinkUpSocket {
     });
   }
 
-  /**
-   * Send a new message.
-   *
-   * Backend expects:
-   * {
-   *   type: "message:send",
-   *   conversationId,
-   *   content,
-   *   replyToId?
-   * }
-   */
   sendMessage(conversationId: string, content: string, replyToId?: string) {
     const cleanContent = content.trim();
 
@@ -325,6 +271,28 @@ class LinkUpSocket {
       conversationId,
       content: cleanContent,
       ...(replyToId ? { replyToId } : {}),
+    });
+  }
+
+  startTyping(conversationId: string) {
+    if (!conversationId || !this.authenticated) {
+      return false;
+    }
+
+    return this.send({
+      type: "typing:start",
+      conversationId,
+    });
+  }
+
+  stopTyping(conversationId: string) {
+    if (!conversationId || !this.authenticated) {
+      return false;
+    }
+
+    return this.send({
+      type: "typing:stop",
+      conversationId,
     });
   }
 

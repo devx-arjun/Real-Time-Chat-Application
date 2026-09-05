@@ -18,7 +18,11 @@ import {
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { getConversation, getMessages } from "../api/conversation.api";
+import {
+  getConversation,
+  getMessages,
+  joinConversation,
+} from "../api/conversation.api";
 import type {
   Conversation,
   ConversationMessage,
@@ -80,36 +84,7 @@ export default function ChatPage() {
   }>();
 
   const [conversation, setConversation] = useState<Conversation | null>(null);
-
-  useEffect(() => {
-    if (!guestId || !conversationId) {
-      setConversation(null);
-      return;
-    }
-
-    let cancelled = false;
-
-    async function loadConversation() {
-      try {
-        const data = await getConversation(conversationId);
-
-        if (!cancelled) {
-          setConversation(data.conversation);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          console.error("Failed to load conversation:", error);
-          setConversation(null);
-        }
-      }
-    }
-
-    void loadConversation();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [guestId, conversationId]);
+  const [isParticipant, setIsParticipant] = useState<boolean | null>(null);
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
@@ -149,8 +124,8 @@ export default function ChatPage() {
   const [typingUsers, setTypingUsers] = useState<
     { id: string; username: string }[]
   >([]);
-
   const typingTimeoutRef = useRef<number | null>(null);
+  const isTypingRef = useRef(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -177,9 +152,90 @@ export default function ChatPage() {
   const hasMessages = messages.length > 0;
 
   useEffect(() => {
+    if (!guestId || !conversationId) {
+      setConversation(null);
+      setIsParticipant(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadConversation() {
+      try {
+        setIsParticipant(null);
+
+        const data = await getConversation(conversationId);
+
+        if (cancelled) {
+          return;
+        }
+
+        setConversation(data.conversation);
+
+        // Already a participant — nothing else required.
+        if (data.isParticipant) {
+          setIsParticipant(true);
+          return;
+        }
+
+        // Not a participant yet.
+        // Join through the REST API first so the database
+        // contains a ConversationParticipant record.
+        console.log("Joining conversation:", conversationId);
+
+        await joinConversation(conversationId);
+
+        if (cancelled) {
+          return;
+        }
+
+        console.log("Successfully joined conversation:", conversationId);
+
+        setIsParticipant(true);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load/join conversation:", error);
+
+          setIsParticipant(false);
+          setConversation(null);
+        }
+      }
+    }
+
+    void loadConversation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [guestId, conversationId]);
+
+  useEffect(() => {
+    if (loadingMessages) {
+      return;
+    }
+
+    if (!initialLoadRef.current) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: "auto",
+      });
+
+      initialLoadRef.current = false;
+    });
+  }, [loadingMessages]);
+
+  useEffect(() => {
     if (!conversationId) {
       setMessages([]);
       setLoadingMessages(false);
+      return;
+    }
+
+    if (isParticipant !== true) {
+      setLoadingMessages(isParticipant === null);
       return;
     }
 
@@ -225,25 +281,7 @@ export default function ChatPage() {
     return () => {
       cancelled = true;
     };
-  }, [conversationId]);
-
-  useEffect(() => {
-    if (loadingMessages) {
-      return;
-    }
-
-    if (!initialLoadRef.current) {
-      return;
-    }
-
-    requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({
-        behavior: "auto",
-      });
-
-      initialLoadRef.current = false;
-    });
-  }, [loadingMessages]);
+  }, [conversationId, isParticipant]);
 
   const loadOlderMessages = async () => {
     if (
@@ -348,7 +386,7 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-    if (!guestId || !conversationId) {
+    if (!guestId || !conversationId || isParticipant !== true) {
       return;
     }
 
@@ -521,7 +559,7 @@ export default function ChatPage() {
 
       socket.leaveConversation(conversationId);
     };
-  }, [guestId, conversationId]);
+  }, [guestId, conversationId, isParticipant]);
 
   useEffect(() => {
     if (!shouldScrollToBottomRef.current) {
@@ -544,8 +582,12 @@ export default function ChatPage() {
       return;
     }
 
+    // Input was cleared
     if (!value.trim()) {
-      socket.stopTyping(conversationId);
+      if (isTypingRef.current) {
+        socket.stopTyping(conversationId);
+        isTypingRef.current = false;
+      }
 
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
@@ -555,14 +597,21 @@ export default function ChatPage() {
       return;
     }
 
-    socket.startTyping(conversationId);
+    // Only send typing:start once.
+    if (!isTypingRef.current) {
+      socket.startTyping(conversationId);
+      isTypingRef.current = true;
+    }
 
+    // Reset the inactivity timer every time the user types.
     if (typingTimeoutRef.current) {
       window.clearTimeout(typingTimeoutRef.current);
     }
 
     typingTimeoutRef.current = window.setTimeout(() => {
       socket.stopTyping(conversationId);
+
+      isTypingRef.current = false;
       typingTimeoutRef.current = null;
     }, 1500);
   };
@@ -696,6 +745,20 @@ export default function ChatPage() {
     return () => {
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [conversationId]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        window.clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+
+      if (isTypingRef.current && conversationId) {
+        socket.stopTyping(conversationId);
+        isTypingRef.current = false;
       }
     };
   }, [conversationId]);
@@ -1523,19 +1586,45 @@ export default function ChatPage() {
           </div>
 
           {typingUsers.length > 0 && (
-            <div className="border-t border-slate-100 bg-white px-4 pt-2 sm:px-6">
-              <div className="mx-auto max-w-4xl px-1">
-                <div className="flex items-center gap-2 text-[10px] font-medium text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-500" />
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-400 [animation-delay:150ms]" />
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-300 [animation-delay:300ms]" />
-                  </span>
+            <div className="border-t border-slate-100 bg-white px-4 py-2 sm:px-6">
+              <div className="mx-auto flex max-w-4xl items-center gap-2 px-1">
+                {/* Avatars */}
+                <div className="flex -space-x-1.5">
+                  {typingUsers.slice(0, 3).map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-violet-100 text-[9px] font-semibold text-violet-700"
+                      title={user.username}
+                    >
+                      {user.username.charAt(0).toUpperCase()}
+                    </div>
+                  ))}
 
+                  {typingUsers.length > 3 && (
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-100 text-[9px] font-semibold text-slate-500">
+                      +{typingUsers.length - 3}
+                    </div>
+                  )}
+                </div>
+
+                {/* Text */}
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
                   <span>
                     {typingUsers.length === 1
-                      ? `${typingUsers[0].username} is typing...`
-                      : `${typingUsers.length} people are typing...`}
+                      ? `${typingUsers[0].username} is typing`
+                      : typingUsers.length === 2
+                        ? `${typingUsers[0].username} and ${typingUsers[1].username} are typing`
+                        : typingUsers.length === 3
+                          ? `${typingUsers[0].username}, ${typingUsers[1].username}, and ${typingUsers[2].username} are typing`
+                          : `${typingUsers[0].username}, ${typingUsers[1].username}, and ${
+                              typingUsers.length - 2
+                            } others are typing`}
+                  </span>
+
+                  <span className="flex items-center gap-0.5">
+                    <span className="h-1 w-1 animate-pulse rounded-full bg-violet-400" />
+                    <span className="h-1 w-1 animate-pulse rounded-full bg-violet-400 [animation-delay:150ms]" />
+                    <span className="h-1 w-1 animate-pulse rounded-full bg-violet-400 [animation-delay:300ms]" />
                   </span>
                 </div>
               </div>

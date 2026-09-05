@@ -88,12 +88,9 @@ export function setupWebSocket(server: HttpServer) {
   wss.on("connection", (socket) => {
     console.log("WebSocket client connected");
 
-    // Internal Prisma User ID.
-    // Used only for the connections map and database participant lookup.
     let userId: string | null = null;
-
-    // Guest ID used by your application/services.
     let authenticatedGuestId: string | null = null;
+    let authenticatedUsername: string | null = null;
 
     const joinedConversations = new Set<string>();
 
@@ -159,12 +156,9 @@ export function setupWebSocket(server: HttpServer) {
             return;
           }
 
-          // Keep BOTH identities:
-          //
-          // user.id     -> internal database identity
-          // user.guestId -> application guest identity
           userId = user.id;
           authenticatedGuestId = user.guestId;
+          authenticatedUsername = user.username;
 
           addConnection(user.id, socket);
 
@@ -272,6 +266,108 @@ export function setupWebSocket(server: HttpServer) {
           send(socket, {
             type: "conversation:left",
             conversationId,
+          });
+
+          return;
+        }
+
+        // --------------------------------------------------
+        // TYPING START
+        // --------------------------------------------------
+
+        if (data.type === "typing:start") {
+          if (typeof data.conversationId !== "string") {
+            send(socket, {
+              type: "error",
+              message: "Invalid conversation ID",
+            });
+
+            return;
+          }
+
+          const conversationId = data.conversationId.trim();
+
+          if (!conversationId) {
+            send(socket, {
+              type: "error",
+              message: "Invalid conversation ID",
+            });
+
+            return;
+          }
+
+          // The user must already be inside the WebSocket conversation room.
+          if (!joinedConversations.has(conversationId)) {
+            send(socket, {
+              type: "error",
+              message: "Join the conversation first",
+            });
+
+            return;
+          }
+
+          // Make sure the user is actually a database participant.
+          const participant = await prisma.conversationParticipant.findUnique({
+            where: {
+              userId_conversationId: {
+                userId,
+                conversationId,
+              },
+            },
+          });
+
+          if (!participant) {
+            send(socket, {
+              type: "error",
+              message: "You are not a participant in this conversation",
+            });
+
+            return;
+          }
+
+          broadcastToConversation(conversationId, {
+            type: "typing:start",
+            conversationId,
+            userId,
+            username: authenticatedUsername,
+          });
+
+          return;
+        }
+
+        // --------------------------------------------------
+        // TYPING STOP
+        // --------------------------------------------------
+
+        if (data.type === "typing:stop") {
+          if (typeof data.conversationId !== "string") {
+            send(socket, {
+              type: "error",
+              message: "Invalid conversation ID",
+            });
+
+            return;
+          }
+
+          const conversationId = data.conversationId.trim();
+
+          if (!conversationId) {
+            send(socket, {
+              type: "error",
+              message: "Invalid conversation ID",
+            });
+
+            return;
+          }
+
+          if (!joinedConversations.has(conversationId)) {
+            return;
+          }
+
+          broadcastToConversation(conversationId, {
+            type: "typing:stop",
+            conversationId,
+            userId,
           });
 
           return;

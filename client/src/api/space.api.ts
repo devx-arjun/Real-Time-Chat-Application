@@ -142,3 +142,7 @@ export async function leaveSpace(
 
   return response.data;
 }
+
+export async function deleteSpace(spaceId: string): Promise<void> {
+  await api.delete(`/spaces/${spaceId}`);
+}

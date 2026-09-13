@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Bell,
   Check,
+  Copy,
   Hash,
   Info,
   MessageCircle,
@@ -14,14 +15,19 @@ import {
   Trash2,
   Users,
   X,
+  FileText,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import type { KeyboardEvent } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
+  deleteConversation,
   getConversation,
   getMessages,
   joinConversation,
+  leaveConversation,
 } from "../api/conversation.api";
 import type {
   Conversation,
@@ -32,6 +38,24 @@ import { useAuth } from "../context/useAuth";
 import { socket } from "../services/socket";
 
 const QUICK_REACTIONS = ["❤️", "😂", "👍", "🔥", "😮", "🎉"];
+const emojis = [
+  "😀",
+  "😂",
+  "😍",
+  "😊",
+  "😭",
+  "😎",
+  "🤔",
+  "😮",
+  "😢",
+  "😡",
+  "❤️",
+  "🔥",
+  "👍",
+  "👏",
+  "🎉",
+  "🙌",
+];
 
 function EmptyChat() {
   return (
@@ -83,14 +107,16 @@ export default function ChatPage() {
     conversationId: string;
   }>();
 
+  const navigate = useNavigate();
+
   const [conversation, setConversation] = useState<Conversation | null>(null);
+
   const [isParticipant, setIsParticipant] = useState<boolean | null>(null);
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
 
   const [loadingMessages, setLoadingMessages] = useState(true);
-
   const [loadingMore, setLoadingMore] = useState(false);
 
   const [messagesError, setMessagesError] = useState<string | null>(null);
@@ -98,6 +124,18 @@ export default function ChatPage() {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
 
   const [showInfo, setShowInfo] = useState(false);
+
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+
+  const [conversationActionLoading, setConversationActionLoading] =
+    useState(false);
+
+  const [conversationActionError, setConversationActionError] = useState<
+    string | null
+  >(null);
 
   const [sending, setSending] = useState(false);
 
@@ -124,6 +162,22 @@ export default function ChatPage() {
   const [typingUsers, setTypingUsers] = useState<
     { id: string; username: string }[]
   >([]);
+
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Conversation permissions
+  const isConversationOwner =
+    !!currentUserId &&
+    !!conversation?.ownerId &&
+    conversation.ownerId === currentUserId;
+
+  const canManageConversation = isParticipant === true;
+
   const typingTimeoutRef = useRef<number | null>(null);
   const isTypingRef = useRef(false);
 
@@ -142,14 +196,27 @@ export default function ChatPage() {
     scrollHeight: number;
   } | null>(null);
 
+  const isParticipantRef = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    isParticipantRef.current = isParticipant;
+  }, [isParticipant]);
+
   const conversationTitle =
     conversation?.title || conversation?.space?.name || "Conversation";
 
   const participantCount = conversation?._count?.participants ?? 0;
 
-  const messageCount = conversation?._count?.messages ?? messages.length;
-
   const hasMessages = messages.length > 0;
+
+  const canSendMessage =
+    isParticipant === true && socketConnected && socket.isAuthenticated();
+
+  /*
+   * =========================================================
+   * LOAD CONVERSATION
+   * =========================================================
+   */
 
   useEffect(() => {
     if (!guestId || !conversationId) {
@@ -158,13 +225,14 @@ export default function ChatPage() {
       return;
     }
 
+    const id = conversationId;
     let cancelled = false;
 
     async function loadConversation() {
       try {
         setIsParticipant(null);
 
-        const data = await getConversation(conversationId);
+        const data = await getConversation(id);
 
         if (cancelled) {
           return;
@@ -172,24 +240,24 @@ export default function ChatPage() {
 
         setConversation(data.conversation);
 
-        // Already a participant — nothing else required.
+        // Already a participant.
         if (data.isParticipant) {
           setIsParticipant(true);
           return;
         }
 
-        // Not a participant yet.
-        // Join through the REST API first so the database
-        // contains a ConversationParticipant record.
-        console.log("Joining conversation:", conversationId);
+        // Private conversations must be explicitly joined.
+        if (data.conversation.isPrivate) {
+          setIsParticipant(false);
+          return;
+        }
 
-        await joinConversation(conversationId);
+        // Public conversation — automatically join.
+        await joinConversation(id);
 
         if (cancelled) {
           return;
         }
-
-        console.log("Successfully joined conversation:", conversationId);
 
         setIsParticipant(true);
       } catch (error) {
@@ -207,7 +275,13 @@ export default function ChatPage() {
     return () => {
       cancelled = true;
     };
-  }, [guestId, conversationId]);
+  }, [guestId, conversationId, currentUserId]);
+
+  /*
+   * =========================================================
+   * INITIAL SCROLL
+   * =========================================================
+   */
 
   useEffect(() => {
     if (loadingMessages) {
@@ -227,6 +301,12 @@ export default function ChatPage() {
     });
   }, [loadingMessages]);
 
+  /*
+   * =========================================================
+   * LOAD MESSAGES
+   * =========================================================
+   */
+
   useEffect(() => {
     if (!conversationId) {
       setMessages([]);
@@ -239,6 +319,7 @@ export default function ChatPage() {
       return;
     }
 
+    const id = conversationId;
     let cancelled = false;
 
     async function loadMessages() {
@@ -251,7 +332,7 @@ export default function ChatPage() {
         initialLoadRef.current = true;
         shouldScrollToBottomRef.current = false;
 
-        const data = await getMessages(conversationId, 50);
+        const data = await getMessages(id, 50);
 
         if (cancelled) {
           return;
@@ -283,6 +364,12 @@ export default function ChatPage() {
     };
   }, [conversationId, isParticipant]);
 
+  /*
+   * =========================================================
+   * LOAD OLDER MESSAGES
+   * =========================================================
+   */
+
   const loadOlderMessages = async () => {
     if (
       !conversationId ||
@@ -300,7 +387,6 @@ export default function ChatPage() {
     }
 
     const previousScrollHeight = container.scrollHeight;
-
     const previousScrollTop = container.scrollTop;
 
     try {
@@ -362,6 +448,31 @@ export default function ChatPage() {
       void loadOlderMessages();
     }
   };
+  function handleEmojiClick(emoji: string) {
+    setMessage((current) => `${current}${emoji}`);
+    setShowEmojiPicker(false);
+  }
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    setSelectedFile(file);
+
+    // Allows selecting the same file again later.
+    event.target.value = "";
+  }
+
+  function removeSelectedFile() {
+    setSelectedFile(null);
+  }
+
+  /*
+   * =========================================================
+   * MESSAGE SORTING
+   * =========================================================
+   */
 
   const sortedMessages = useMemo(
     () =>
@@ -385,26 +496,41 @@ export default function ChatPage() {
     return distanceFromBottom < 140;
   };
 
+  /*
+   * =========================================================
+   * WEBSOCKET
+   * =========================================================
+   */
+
   useEffect(() => {
-    if (!guestId || !conversationId || isParticipant !== true) {
+    if (!guestId || !conversationId) {
       return;
     }
 
     console.log("Setting up WebSocket for conversation:", conversationId);
+
     const unsubscribeConnection = socket.onConnectionChange((connected) => {
       setSocketConnected(connected);
     });
 
     const unsubscribeAuth = socket.onAuthenticated(() => {
-      console.log(
-        "WebSocket authenticated. Joining conversation:",
-        conversationId,
-      );
+      console.log("WebSocket authenticated:", conversationId);
 
-      socket.joinConversation(conversationId);
+      if (isParticipantRef.current === true) {
+        console.log(
+          "Participant confirmed. Joining conversation:",
+          conversationId,
+        );
+
+        socket.joinConversation(conversationId);
+      }
     });
 
     const unsubscribeMessages = socket.onMessage((data) => {
+      /*
+       * MESSAGE CREATED
+       */
+
       if (data.type === "message:new") {
         const incomingMessage = data.message;
 
@@ -431,6 +557,10 @@ export default function ChatPage() {
         return;
       }
 
+      /*
+       * MESSAGE UPDATED
+       */
+
       if (data.type === "message:updated") {
         const updatedMessage = data.message;
 
@@ -451,6 +581,10 @@ export default function ChatPage() {
         return;
       }
 
+      /*
+       * MESSAGE DELETED
+       */
+
       if (data.type === "message:deleted") {
         const deletedMessage = data.message;
 
@@ -470,6 +604,10 @@ export default function ChatPage() {
 
         return;
       }
+
+      /*
+       * REACTION
+       */
 
       if (data.type === "message:reaction") {
         if (
@@ -496,11 +634,19 @@ export default function ChatPage() {
 
         return;
       }
+
+      /*
+       * CONVERSATION JOINED
+       */
+
       if (data.type === "conversation:joined") {
         console.log("Joined conversation:", data.conversationId);
-
         return;
       }
+
+      /*
+       * TYPING START
+       */
 
       if (data.type === "typing:start") {
         if (
@@ -510,9 +656,15 @@ export default function ChatPage() {
           return;
         }
 
-        if (!data.userId || !data.username) {
+        if (
+          typeof data.userId !== "string" ||
+          typeof data.username !== "string"
+        ) {
           return;
         }
+
+        const userId = data.userId;
+        const username = data.username;
 
         setTypingUsers((current) => {
           if (current.some((user) => user.id === data.userId)) {
@@ -522,14 +674,19 @@ export default function ChatPage() {
           return [
             ...current,
             {
-              id: data.userId,
-              username: data.username,
+              id: userId,
+              username,
             },
           ];
         });
 
         return;
       }
+
+      /*
+       * TYPING STOP
+       */
+
       if (data.type === "typing:stop") {
         if (data.conversationId !== conversationId || !data.userId) {
           return;
@@ -538,8 +695,6 @@ export default function ChatPage() {
         setTypingUsers((current) =>
           current.filter((user) => user.id !== data.userId),
         );
-
-        return;
       }
     });
 
@@ -547,6 +702,7 @@ export default function ChatPage() {
       console.error("WebSocket server error:", error);
     });
 
+    // Start/reuse the WebSocket connection.
     socket.connect(guestId);
 
     return () => {
@@ -559,7 +715,30 @@ export default function ChatPage() {
 
       socket.leaveConversation(conversationId);
     };
+  }, [guestId, conversationId, currentUserId]);
+
+  useEffect(() => {
+    if (!guestId || !conversationId || isParticipant !== true) {
+      return;
+    }
+
+    if (!socket.isAuthenticated()) {
+      return;
+    }
+
+    console.log(
+      "Participant confirmed. Joining WebSocket conversation:",
+      conversationId,
+    );
+
+    socket.joinConversation(conversationId);
   }, [guestId, conversationId, isParticipant]);
+
+  /*
+   * =========================================================
+   * SCROLL TO NEW MESSAGE
+   * =========================================================
+   */
 
   useEffect(() => {
     if (!shouldScrollToBottomRef.current) {
@@ -575,6 +754,12 @@ export default function ChatPage() {
     });
   }, [messages.length]);
 
+  /*
+   * =========================================================
+   * TYPING
+   * =========================================================
+   */
+
   const handleTyping = (value: string) => {
     setMessage(value);
 
@@ -582,7 +767,7 @@ export default function ChatPage() {
       return;
     }
 
-    // Input was cleared
+    // Input was cleared.
     if (!value.trim()) {
       if (isTypingRef.current) {
         socket.stopTyping(conversationId);
@@ -591,6 +776,7 @@ export default function ChatPage() {
 
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
+
         typingTimeoutRef.current = null;
       }
 
@@ -603,7 +789,7 @@ export default function ChatPage() {
       isTypingRef.current = true;
     }
 
-    // Reset the inactivity timer every time the user types.
+    // Reset inactivity timer.
     if (typingTimeoutRef.current) {
       window.clearTimeout(typingTimeoutRef.current);
     }
@@ -616,6 +802,12 @@ export default function ChatPage() {
     }, 1500);
   };
 
+  /*
+   * =========================================================
+   * SEND MESSAGE
+   * =========================================================
+   */
+
   const handleSubmit = async () => {
     const value = message.trim();
 
@@ -623,9 +815,8 @@ export default function ChatPage() {
       return;
     }
 
-    if (!socket.isAuthenticated()) {
-      console.warn("Cannot send message: WebSocket is not authenticated.");
-
+    if (!canSendMessage) {
+      console.warn("Cannot send message: conversation is not ready.");
       return;
     }
 
@@ -646,8 +837,16 @@ export default function ChatPage() {
     }
   };
 
+  /*
+   * =========================================================
+   * DELETE MESSAGE
+   * =========================================================
+   */
+
   async function handleDeleteMessage(messageId: string) {
-    if (!messageId || deletingMessageId) return;
+    if (!messageId || deletingMessageId) {
+      return;
+    }
 
     try {
       setDeletingMessageId(messageId);
@@ -664,6 +863,12 @@ export default function ChatPage() {
       setDeletingMessageId(null);
     }
   }
+
+  /*
+   * =========================================================
+   * EDIT MESSAGE
+   * =========================================================
+   */
 
   function startEditingMessage(item: ConversationMessage) {
     if (item.deletedAt) {
@@ -714,6 +919,12 @@ export default function ChatPage() {
     }
   }
 
+  /*
+   * =========================================================
+   * REACTIONS
+   * =========================================================
+   */
+
   function handleReaction(messageId: string, emoji: string) {
     if (!messageId || !emoji) {
       return;
@@ -721,6 +932,7 @@ export default function ChatPage() {
 
     if (!socket.isAuthenticated()) {
       console.warn("Cannot react: WebSocket is not authenticated.");
+
       return;
     }
 
@@ -728,31 +940,63 @@ export default function ChatPage() {
 
     if (!sent) {
       console.warn("Failed to send reaction: WebSocket is not connected.");
+
       return;
     }
 
     setOpenReactionMessageId(null);
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  /*
+   * =========================================================
+   * KEYBOARD
+   * =========================================================
+   */
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       void handleSubmit();
     }
   };
 
-  useEffect(() => {
-    return () => {
-      if (typingTimeoutRef.current) {
-        window.clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, [conversationId]);
+  /*
+   * =========================================================
+   * COPY PRIVATE CONVERSATION CODE
+   * =========================================================
+   */
+
+  async function handleCopyJoinCode() {
+    const code = conversation?.joinCode;
+
+    if (!code) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(code);
+
+      setCodeCopied(true);
+
+      window.setTimeout(() => {
+        setCodeCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy conversation code:", error);
+    }
+  }
+
+  /*
+   * =========================================================
+   * CLEANUP TYPING
+   * =========================================================
+   */
 
   useEffect(() => {
     return () => {
       if (typingTimeoutRef.current) {
         window.clearTimeout(typingTimeoutRef.current);
+
         typingTimeoutRef.current = null;
       }
 
@@ -763,8 +1007,85 @@ export default function ChatPage() {
     };
   }, [conversationId]);
 
+  useEffect(() => {
+    function handleEscape(event: globalThis.KeyboardEvent) {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      setShowMoreMenu(false);
+
+      if (!conversationActionLoading) {
+        setShowDeleteConfirm(false);
+        setShowLeaveConfirm(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [conversationActionLoading]);
+
+  async function handleDeleteConversation() {
+    if (!conversationId || conversationActionLoading) {
+      return;
+    }
+
+    try {
+      setConversationActionLoading(true);
+      setConversationActionError(null);
+
+      await deleteConversation(conversationId);
+
+      navigate(
+        conversation?.spaceId ? `/space/${conversation.spaceId}` : "/home",
+        { replace: true },
+      );
+    } catch (error: any) {
+      console.error("Failed to delete conversation:", error);
+
+      setConversationActionError(
+        error?.response?.data?.message || "Failed to delete conversation.",
+      );
+    } finally {
+      setConversationActionLoading(false);
+    }
+  }
+
+  async function handleLeaveConversation() {
+    if (!conversationId || conversationActionLoading) {
+      return;
+    }
+
+    try {
+      setConversationActionLoading(true);
+      setConversationActionError(null);
+
+      await leaveConversation(conversationId);
+
+      navigate(
+        conversation?.spaceId ? `/space/${conversation.spaceId}` : "/home",
+        { replace: true },
+      );
+    } catch (error: any) {
+      console.error("Failed to leave conversation:", error);
+
+      setConversationActionError(
+        error?.response?.data?.message || "Failed to leave conversation.",
+      );
+    } finally {
+      setConversationActionLoading(false);
+    }
+  }
+
   return (
     <div className="flex h-[calc(100vh-92px)] flex-col overflow-hidden rounded-[26px] border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.07)]">
+      {/* =====================================================
+          CHAT HEADER
+      ====================================================== */}
+
       <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200/70 bg-white px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Link
@@ -854,6 +1175,7 @@ export default function ChatPage() {
               hover:text-slate-900
               sm:grid
             "
+            aria-label="Search messages"
           >
             <Search size={17} />
           </button>
@@ -872,6 +1194,7 @@ export default function ChatPage() {
               hover:text-slate-900
               sm:grid
             "
+            aria-label="Notifications"
           >
             <Bell size={17} />
           </button>
@@ -885,26 +1208,104 @@ export default function ChatPage() {
                 ? "bg-violet-50 text-violet-600"
                 : "text-slate-400 hover:bg-slate-100 hover:text-slate-900",
             ].join(" ")}
+            aria-label="Conversation info"
           >
             <Info size={17} />
           </button>
 
-          <button
-            type="button"
-            className="
-              grid
-              h-9
-              w-9
-              place-items-center
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowMoreMenu((value) => !value)}
+              className="
+      grid
+      h-9
+      w-9
+      place-items-center
+      rounded-xl
+      text-slate-400
+      transition
+      hover:bg-slate-100
+      hover:text-slate-900
+    "
+              aria-label="More options"
+              aria-expanded={showMoreMenu}
+            >
+              <MoreHorizontal size={18} />
+            </button>
+
+            {showMoreMenu && (
+              <>
+                {/* Outside click */}
+                <button
+                  type="button"
+                  aria-label="Close more options"
+                  onClick={() => setShowMoreMenu(false)}
+                  className="fixed inset-0 z-40 cursor-default"
+                />
+
+                <div className="absolute right-0 top-11 z-50 w-52 overflow-hidden rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xl shadow-slate-900/10">
+                  {canManageConversation && isConversationOwner && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMoreMenu(false);
+                        setConversationActionError(null);
+                        setShowDeleteConfirm(true);
+                      }}
+                      className="
+              flex
+              w-full
+              items-center
+              gap-3
               rounded-xl
-              text-slate-400
+              px-3
+              py-2.5
+              text-left
+              text-sm
+              font-medium
+              text-red-600
               transition
-              hover:bg-slate-100
-              hover:text-slate-900
+              hover:bg-red-50
             "
-          >
-            <MoreHorizontal size={18} />
-          </button>
+                    >
+                      <Trash2 size={16} />
+                      Delete conversation
+                    </button>
+                  )}
+
+                  {canManageConversation && !isConversationOwner && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMoreMenu(false);
+                        setConversationActionError(null);
+                        setShowLeaveConfirm(true);
+                      }}
+                      className="
+              flex
+              w-full
+              items-center
+              gap-3
+              rounded-xl
+              px-3
+              py-2.5
+              text-left
+              text-sm
+              font-medium
+              text-slate-600
+              transition
+              hover:bg-slate-50
+            "
+                    >
+                      <ArrowLeft size={16} />
+                      Leave conversation
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -926,12 +1327,10 @@ export default function ChatPage() {
               />
 
               {loadingMessages
-                ? "Loading messages..."
+                ? "Loading..."
                 : !socketConnected
                   ? "Reconnecting..."
-                  : messageCount > 0
-                    ? `${messageCount} messages in this conversation`
-                    : "This conversation is just getting started"}
+                  : "Live conversation"}
             </div>
           </div>
 
@@ -1034,6 +1433,7 @@ export default function ChatPage() {
                   const grouped = previousSender === senderId;
 
                   const deleted = !!item.deletedAt;
+
                   const myReaction = currentUserId
                     ? item.reactions?.find(
                         (reaction) => reaction.user?.id === currentUserId,
@@ -1090,21 +1490,21 @@ export default function ChatPage() {
                       {!mine && !grouped ? (
                         <div
                           className="
-                              mt-1
-                              grid
-                              h-8
-                              w-8
-                              shrink-0
-                              place-items-center
-                              overflow-hidden
-                              rounded-[10px]
-                              bg-gradient-to-br
-                              from-violet-500
-                              to-indigo-600
-                              text-[10px]
-                              font-black
-                              text-white
-                            "
+                            mt-1
+                            grid
+                            h-8
+                            w-8
+                            shrink-0
+                            place-items-center
+                            overflow-hidden
+                            rounded-[10px]
+                            bg-gradient-to-br
+                            from-violet-500
+                            to-indigo-600
+                            text-[10px]
+                            font-black
+                            text-white
+                          "
                         >
                           {item.sender?.avatarUrl ? (
                             <img
@@ -1157,8 +1557,10 @@ export default function ChatPage() {
                         )}
 
                         {/* MESSAGE + OPTIONS */}
+
                         <div className="group relative flex items-end gap-1">
-                          {/* MESSAGE OPTIONS — LEFT OF OWN MESSAGE */}
+                          {/* MESSAGE OPTIONS */}
+
                           {mine && !deleted && editingMessageId !== item.id && (
                             <div className="relative order-first self-center">
                               <button
@@ -1174,6 +1576,7 @@ export default function ChatPage() {
                                     ? "bg-slate-100 text-slate-700 opacity-100"
                                     : "text-slate-300 opacity-0 hover:bg-slate-100 hover:text-slate-700 group-hover:opacity-100",
                                 ].join(" ")}
+                                aria-label="Message options"
                               >
                                 <MoreHorizontal size={16} />
                               </button>
@@ -1184,42 +1587,42 @@ export default function ChatPage() {
                                     type="button"
                                     onClick={() => setOpenMessageMenuId(null)}
                                     className="fixed inset-0 z-40 cursor-default"
+                                    aria-label="Close menu"
                                   />
 
                                   <div
                                     className="
-              absolute
-              left-0
-              top-9
-              z-50
-              flex
-              items-center
-              gap-0.5
-              rounded-xl
-              border
-              border-slate-200/80
-              bg-white/95
-              p-1
-              shadow-[0_10px_30px_rgba(15,23,42,0.12)]
-              backdrop-blur-xl
-            "
+                                        absolute
+                                        left-0
+                                        top-9
+                                        z-50
+                                        flex
+                                        items-center
+                                        gap-0.5
+                                        rounded-xl
+                                        border
+                                        border-slate-200/80
+                                        bg-white/95
+                                        p-1
+                                        shadow-[0_10px_30px_rgba(15,23,42,0.12)]
+                                        backdrop-blur-xl
+                                      "
                                   >
                                     <button
                                       type="button"
                                       onClick={() => startEditingMessage(item)}
                                       className="
-                group/action
-                relative
-                grid
-                h-8
-                w-8
-                place-items-center
-                rounded-lg
-                text-slate-400
-                transition
-                hover:bg-violet-50
-                hover:text-violet-600
-              "
+                                          grid
+                                          h-8
+                                          w-8
+                                          place-items-center
+                                          rounded-lg
+                                          text-slate-400
+                                          transition
+                                          hover:bg-violet-50
+                                          hover:text-violet-600
+                                        "
+                                      aria-label="Edit message"
                                     >
                                       <Pencil size={14} />
                                     </button>
@@ -1231,20 +1634,19 @@ export default function ChatPage() {
                                       }
                                       disabled={deletingMessageId === item.id}
                                       className="
-                group/action
-                relative
-                grid
-                h-8
-                w-8
-                place-items-center
-                rounded-lg
-                text-slate-400
-                transition
-                hover:bg-red-50
-                hover:text-red-600
-                disabled:cursor-not-allowed
-                disabled:opacity-40
-              "
+                                          grid
+                                          h-8
+                                          w-8
+                                          place-items-center
+                                          rounded-lg
+                                          text-slate-400
+                                          transition
+                                          hover:bg-red-50
+                                          hover:text-red-600
+                                          disabled:cursor-not-allowed
+                                          disabled:opacity-40
+                                        "
+                                      aria-label="Delete message"
                                     >
                                       {deletingMessageId === item.id ? (
                                         <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-red-500" />
@@ -1259,6 +1661,7 @@ export default function ChatPage() {
                           )}
 
                           {/* MESSAGE AREA */}
+
                           <div
                             className={[
                               "relative",
@@ -1266,19 +1669,20 @@ export default function ChatPage() {
                             ].join(" ")}
                           >
                             {/* MESSAGE */}
+
                             {editingMessageId === item.id ? (
                               <div className="w-[min(520px,78vw)]">
                                 <div
                                   className="
-            overflow-hidden
-            rounded-[18px]
-            border
-            border-violet-200
-            bg-white
-            shadow-[0_4px_18px_rgba(124,58,237,0.10)]
-            focus-within:border-violet-400
-            focus-within:shadow-[0_0_0_4px_rgba(124,58,237,0.06)]
-          "
+                                    overflow-hidden
+                                    rounded-[18px]
+                                    border
+                                    border-violet-200
+                                    bg-white
+                                    shadow-[0_4px_18px_rgba(124,58,237,0.10)]
+                                    focus-within:border-violet-400
+                                    focus-within:shadow-[0_0_0_4px_rgba(124,58,237,0.06)]
+                                  "
                                 >
                                   <textarea
                                     autoFocus
@@ -1304,22 +1708,22 @@ export default function ChatPage() {
                                     rows={3}
                                     disabled={savingEdit}
                                     className="
-              block
-              max-h-40
-              min-h-[72px]
-              w-full
-              resize-none
-              bg-transparent
-              px-4
-              py-3
-              text-sm
-              leading-6
-              text-slate-900
-              outline-none
-              placeholder:text-slate-400
-              disabled:cursor-not-allowed
-              disabled:opacity-60
-            "
+                                      block
+                                      max-h-40
+                                      min-h-[72px]
+                                      w-full
+                                      resize-none
+                                      bg-transparent
+                                      px-4
+                                      py-3
+                                      text-sm
+                                      leading-6
+                                      text-slate-900
+                                      outline-none
+                                      placeholder:text-slate-400
+                                      disabled:cursor-not-allowed
+                                      disabled:opacity-60
+                                    "
                                   />
 
                                   <div className="flex items-center justify-between border-t border-slate-100 px-2.5 py-2">
@@ -1333,17 +1737,18 @@ export default function ChatPage() {
                                         onClick={cancelEditingMessage}
                                         disabled={savingEdit}
                                         className="
-                  grid
-                  h-8
-                  w-8
-                  place-items-center
-                  rounded-lg
-                  text-slate-400
-                  transition
-                  hover:bg-slate-100
-                  hover:text-slate-700
-                  disabled:opacity-40
-                "
+                                          grid
+                                          h-8
+                                          w-8
+                                          place-items-center
+                                          rounded-lg
+                                          text-slate-400
+                                          transition
+                                          hover:bg-slate-100
+                                          hover:text-slate-700
+                                          disabled:opacity-40
+                                        "
+                                        aria-label="Cancel edit"
                                       >
                                         <X size={15} />
                                       </button>
@@ -1357,18 +1762,19 @@ export default function ChatPage() {
                                           !editingContent.trim() || savingEdit
                                         }
                                         className="
-                  grid
-                  h-8
-                  w-8
-                  place-items-center
-                  rounded-lg
-                  bg-violet-600
-                  text-white
-                  transition
-                  hover:bg-violet-700
-                  disabled:cursor-not-allowed
-                  disabled:opacity-30
-                "
+                                          grid
+                                          h-8
+                                          w-8
+                                          place-items-center
+                                          rounded-lg
+                                          bg-violet-600
+                                          text-white
+                                          transition
+                                          hover:bg-violet-700
+                                          disabled:cursor-not-allowed
+                                          disabled:opacity-30
+                                        "
+                                        aria-label="Save edit"
                                       >
                                         <Check size={15} />
                                       </button>
@@ -1394,6 +1800,7 @@ export default function ChatPage() {
                             )}
 
                             {/* REACTIONS */}
+
                             {!deleted && groupedReactions.length > 0 && (
                               <div className="absolute -bottom-0.5 -right-1 z-20 flex items-center gap-1">
                                 {groupedReactions.map((reaction) => (
@@ -1428,30 +1835,30 @@ export default function ChatPage() {
 
                                     <div
                                       className="
-        pointer-events-none
-        absolute
-        bottom-full
-        left-1/2
-        z-[60]
-        mb-2
-        w-max
-        max-w-[220px]
-        -translate-x-1/2
-        translate-y-1
-        rounded-xl
-        border
-        border-slate-200/80
-        bg-slate-950
-        px-3
-        py-2
-        text-left
-        opacity-0
-        shadow-[0_10px_30px_rgba(15,23,42,0.18)]
-        transition-all
-        duration-150
-        group-hover/reaction:translate-y-0
-        group-hover/reaction:opacity-100
-      "
+                                            pointer-events-none
+                                            absolute
+                                            bottom-full
+                                            left-1/2
+                                            z-[60]
+                                            mb-2
+                                            w-max
+                                            max-w-[220px]
+                                            -translate-x-1/2
+                                            translate-y-1
+                                            rounded-xl
+                                            border
+                                            border-slate-200/80
+                                            bg-slate-950
+                                            px-3
+                                            py-2
+                                            text-left
+                                            opacity-0
+                                            shadow-[0_10px_30px_rgba(15,23,42,0.18)]
+                                            transition-all
+                                            duration-150
+                                            group-hover/reaction:translate-y-0
+                                            group-hover/reaction:opacity-100
+                                          "
                                     >
                                       <div className="flex flex-col gap-1">
                                         {reaction.users.map(
@@ -1482,6 +1889,7 @@ export default function ChatPage() {
                             )}
 
                             {/* ADD REACTION */}
+
                             {!deleted &&
                               editingMessageId !== item.id &&
                               !myReaction && (
@@ -1506,11 +1914,13 @@ export default function ChatPage() {
                                         ? "border-violet-200 text-violet-600 opacity-100"
                                         : "border-slate-200 text-slate-400 opacity-0 group-hover:opacity-100",
                                     ].join(" ")}
+                                    aria-label="Add reaction"
                                   >
                                     <Smile size={13} />
                                   </button>
 
                                   {/* REACTION PICKER */}
+
                                   {openReactionMessageId === item.id && (
                                     <>
                                       <button
@@ -1519,24 +1929,25 @@ export default function ChatPage() {
                                           setOpenReactionMessageId(null)
                                         }
                                         className="fixed inset-0 z-40 cursor-default"
+                                        aria-label="Close reaction picker"
                                       />
 
                                       <div
                                         className="
-                absolute
-                bottom-8
-                right-0
-                z-50
-                flex
-                items-center
-                gap-0.5
-                rounded-2xl
-                border
-                border-slate-200/80
-                bg-white
-                p-1.5
-                shadow-[0_10px_30px_rgba(15,23,42,0.14)]
-              "
+                                          absolute
+                                          bottom-8
+                                          right-0
+                                          z-50
+                                          flex
+                                          items-center
+                                          gap-0.5
+                                          rounded-2xl
+                                          border
+                                          border-slate-200/80
+                                          bg-white
+                                          p-1.5
+                                          shadow-[0_10px_30px_rgba(15,23,42,0.14)]
+                                        "
                                       >
                                         {QUICK_REACTIONS.map((emoji) => (
                                           <button
@@ -1548,7 +1959,7 @@ export default function ChatPage() {
                                             className={[
                                               "grid h-8 w-8 place-items-center rounded-xl text-base transition",
                                               "hover:scale-110 hover:bg-violet-50 active:scale-95",
-                                              myReaction?.emoji === emoji
+                                              myReaction === emoji
                                                 ? "bg-violet-50"
                                                 : "",
                                             ].join(" ")}
@@ -1565,7 +1976,9 @@ export default function ChatPage() {
                               )}
                           </div>
                         </div>
+
                         {/* MY MESSAGE TIME */}
+
                         {mine && (
                           <div className="mt-1 flex items-center justify-end gap-1 px-1 text-[9px] font-medium text-slate-300">
                             {item.updatedAt &&
@@ -1585,10 +1998,13 @@ export default function ChatPage() {
             )}
           </div>
 
+          {/* =================================================
+              TYPING INDICATOR
+          ================================================== */}
+
           {typingUsers.length > 0 && (
             <div className="border-t border-slate-100 bg-white px-4 py-2 sm:px-6">
               <div className="mx-auto flex max-w-4xl items-center gap-2 px-1">
-                {/* Avatars */}
                 <div className="flex -space-x-1.5">
                   {typingUsers.slice(0, 3).map((user) => (
                     <div
@@ -1607,7 +2023,6 @@ export default function ChatPage() {
                   )}
                 </div>
 
-                {/* Text */}
                 <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
                   <span>
                     {typingUsers.length === 1
@@ -1630,183 +2045,133 @@ export default function ChatPage() {
               </div>
             </div>
           )}
+
           {/* =================================================
               COMPOSER
           ================================================== */}
 
-          {/* <div className="shrink-0 border-t border-slate-200/70 bg-white p-3 sm:p-4">
-            <div className="mx-auto max-w-3xl">
-              <div
-                className="
-                  overflow-hidden
-                  rounded-[18px]
-                  border
-                  border-slate-200
-                  bg-slate-50
-                  transition
-                  focus-within:border-violet-300
-                  focus-within:bg-white
-                  focus-within:shadow-[0_0_0_4px_rgba(124,58,237,0.06)]
-                "
-              >
-                <textarea
-                  value={message}
-                  onChange={(event) => setMessage(event.target.value)}
-                  onKeyDown={handleKeyDown}
-                  rows={2}
-                  disabled={!conversationId || !socketConnected}
-                  placeholder={
-                    socketConnected
-                      ? `Message ${conversationTitle}...`
-                      : "Connecting..."
-                  }
-                  className="
-                    block
-                    max-h-32
-                    min-h-[54px]
-                    w-full
-                    resize-none
-                    bg-transparent
-                    px-4
-                    pt-3
-                    text-sm
-                    leading-6
-                    text-slate-900
-                    outline-none
-                    placeholder:text-slate-400
-                    disabled:cursor-not-allowed
-                    disabled:opacity-50
-                  "
-                />
+          <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div className="mx-auto max-w-4xl">
+              {/* Attachment preview */}
+              {selectedFile && (
+                <div className="mb-2 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                  {selectedFile.type.startsWith("image/") ? (
+                    <ImageIcon size={18} className="shrink-0 text-violet-500" />
+                  ) : (
+                    <FileText size={18} className="shrink-0 text-slate-500" />
+                  )}
 
-                <div className="flex items-center justify-between px-2.5 pb-2.5">
-                  <div className="flex items-center gap-0.5">
-                    <button
-                      type="button"
-                      className="
-                        grid
-                        h-8
-                        w-8
-                        place-items-center
-                        rounded-lg
-                        text-slate-400
-                        transition
-                        hover:bg-slate-200
-                        hover:text-slate-700
-                      "
-                    >
-                      <Paperclip size={16} />
-                    </button>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-slate-700">
+                      {selectedFile.name}
+                    </p>
 
-                    <button
-                      type="button"
-                      className="
-                        grid
-                        h-8
-                        w-8
-                        place-items-center
-                        rounded-lg
-                        text-slate-400
-                        transition
-                        hover:bg-slate-200
-                        hover:text-slate-700
-                      "
-                      aria-label="Add emoji"
-                    >
-                      <Smile size={16} />
-                    </button>
+                    <p className="text-[11px] text-slate-400">
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => void handleSubmit()}
-                    disabled={
-                      !message.trim() ||
-                      sending ||
-                      !conversationId ||
-                      !socketConnected
-                    }
-                    className="
-                      flex
-                      h-9
-                      items-center
-                      gap-2
-                      rounded-xl
-                      bg-violet-600
-                      px-3.5
-                      text-xs
-                      font-bold
-                      text-white
-                      shadow-sm
-                      transition
-                      hover:-translate-y-0.5
-                      hover:bg-violet-700
-                      disabled:cursor-not-allowed
-                      disabled:opacity-30
-                    "
+                    onClick={removeSelectedFile}
+                    className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-slate-400 transition hover:bg-white hover:text-slate-700"
+                    aria-label="Remove attachment"
                   >
-                    <span className="hidden sm:inline">
-                      {sending ? "Sending..." : "Send"}
-                    </span>
-
-                    <Send size={15} />
+                    <X size={15} />
                   </button>
                 </div>
-              </div>
+              )}
 
-              <p className="mt-2 hidden text-center text-[9px] font-medium text-slate-300 sm:block">
-                Press Enter to send · Shift + Enter for a new line
-              </p>
-            </div>
-          </div> */}
+              <div className="relative">
+                {/* Emoji picker */}
+                {showEmojiPicker && (
+                  <div className="absolute bottom-14 right-10 z-50 w-64 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-600">
+                        Emojis
+                      </span>
 
-          <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
-            <div className="mx-auto max-w-4xl">
-              <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-100">
-                <button
-                  type="button"
-                  className="mb-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl text-slate-400 transition hover:bg-white hover:text-slate-700"
-                  aria-label="Attach file"
-                >
-                  <Paperclip size={17} />
-                </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowEmojiPicker(false)}
+                        className="grid h-6 w-6 place-items-center rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        aria-label="Close emoji picker"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
 
-                <textarea
-                  value={message}
-                  onChange={(event) => handleTyping(event.target.value)}
-                  onKeyDown={handleKeyDown}
-                  rows={1}
-                  placeholder="Write a message..."
-                  className="max-h-32 min-h-9 flex-1 resize-none bg-transparent px-1 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400"
-                />
+                    <div className="grid grid-cols-8 gap-1">
+                      {emojis.map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => handleEmojiClick(emoji)}
+                          className="grid h-8 w-8 place-items-center rounded-lg text-lg transition hover:bg-slate-100"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                <button
-                  type="button"
-                  className="
-                        grid
-                        h-8
-                        w-8
-                        place-items-center
-                        rounded-lg
-                        text-slate-400
-                        transition
-                        hover:bg-slate-200
-                        hover:text-slate-700
-                      "
-                  aria-label="Add emoji"
-                >
-                  <Smile size={16} />
-                </button>
+                <div className="flex items-end gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2 shadow-sm focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-100">
+                  {/* Hidden file input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx,.zip"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
 
-                <button
-                  type="button"
-                  onClick={() => void handleSubmit()}
-                  disabled={!message.trim() || sending || !socketConnected}
-                  className="mb-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-900 text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Send message"
-                >
-                  <Send size={16} />
-                </button>
+                  {/* Attach */}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mb-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl text-slate-400 transition hover:bg-white hover:text-slate-700"
+                    aria-label="Attach file"
+                  >
+                    <Paperclip size={17} />
+                  </button>
+
+                  {/* Message */}
+                  <textarea
+                    value={message}
+                    onChange={(event) => handleTyping(event.target.value)}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                    placeholder="Write a message..."
+                    className="max-h-32 min-h-9 flex-1 resize-none bg-transparent px-1 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                  />
+
+                  {/* Emoji */}
+                  <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker((current) => !current)}
+                    className={`mb-0.5 grid h-8 w-8 place-items-center rounded-lg transition ${
+                      showEmojiPicker
+                        ? "bg-violet-100 text-violet-600"
+                        : "text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+                    }`}
+                    aria-label="Add emoji"
+                    aria-expanded={showEmojiPicker}
+                  >
+                    <Smile size={16} />
+                  </button>
+
+                  {/* Send */}
+                  <button
+                    type="button"
+                    onClick={() => void handleSubmit()}
+                    disabled={!message.trim() || sending || !canSendMessage}
+                    className="mb-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-900 text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                    aria-label="Send message"
+                  >
+                    <Send size={16} />
+                  </button>
+                </div>
               </div>
 
               <div className="mt-1.5 flex items-center justify-between px-1 text-[10px] text-slate-400">
@@ -1827,130 +2192,398 @@ export default function ChatPage() {
         {showInfo && (
           <aside
             className="
-              absolute
-              inset-y-0
-              right-0
-              z-20
-              w-[290px]
-              border-l
-              border-slate-200
-              bg-white
-              shadow-2xl
-              shadow-slate-950/10
-              sm:relative
-              sm:shadow-none
-            "
+      absolute
+      inset-y-0
+      right-0
+      z-20
+      w-[290px]
+      border-l
+      border-slate-200
+      bg-white
+      shadow-2xl
+      shadow-slate-950/10
+      sm:relative
+      sm:shadow-none
+    "
           >
             <div className="flex h-full flex-col">
-              <div className="flex h-[72px] items-center justify-between border-b border-slate-200/70 px-5">
-                <p className="text-sm font-black text-slate-950">
-                  Conversation
-                </p>
+              {/* Info header */}
+
+              <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200/70 px-5">
+                <div className="min-w-0">
+                  <h2 className="truncate text-lg font-black tracking-tight text-slate-950">
+                    {conversationTitle}
+                  </h2>
+
+                  {conversation?.space?.name && (
+                    <p className="mt-0.5 truncate text-[10px] font-medium text-slate-400">
+                      {conversation.space.name}
+                    </p>
+                  )}
+                </div>
 
                 <button
                   type="button"
                   onClick={() => setShowInfo(false)}
                   className="
-                    grid
-                    h-8
-                    w-8
-                    place-items-center
-                    rounded-lg
-                    text-slate-400
-                    transition
-                    hover:bg-slate-100
-                    hover:text-slate-900
-                  "
+            grid
+            h-8
+            w-8
+            shrink-0
+            place-items-center
+            rounded-lg
+            text-slate-400
+            transition
+            hover:bg-slate-100
+            hover:text-slate-900
+          "
+                  aria-label="Close conversation info"
                 >
-                  ×
+                  <X size={16} />
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-5">
-                <div
-                  className="
-                    grid
-                    h-16
-                    w-16
-                    place-items-center
-                    rounded-[20px]
-                    border
-                    border-violet-100
-                    bg-violet-50
-                    text-violet-600
-                  "
-                >
-                  {conversation?.space ? (
-                    <Hash size={25} />
-                  ) : (
-                    <MessageCircle size={25} />
-                  )}
-                </div>
+                {/* =================================================
+            PRIVATE CONVERSATION CODE
+        ================================================== */}
 
-                <h2 className="mt-4 text-lg font-black tracking-tight text-slate-950">
-                  {conversationTitle}
-                </h2>
+                {conversation?.isPrivate && conversation.joinCode && (
+                  <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-500">
+                          Private invite code
+                        </p>
 
-                {conversation?.space?.name && (
-                  <p className="mt-1 text-xs text-slate-400">
-                    {conversation.space.name}
-                  </p>
+                        <p className="mt-2 break-all font-mono text-xl font-black tracking-[0.2em] text-slate-950">
+                          {conversation.joinCode}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => void handleCopyJoinCode()}
+                        className="
+                  grid
+                  h-9
+                  w-9
+                  shrink-0
+                  place-items-center
+                  rounded-xl
+                  bg-white
+                  text-slate-400
+                  shadow-sm
+                  transition
+                  hover:bg-slate-950
+                  hover:text-white
+                "
+                        aria-label={
+                          codeCopied
+                            ? "Conversation code copied"
+                            : "Copy conversation code"
+                        }
+                        title={codeCopied ? "Copied" : "Copy code"}
+                      >
+                        {codeCopied ? <Check size={15} /> : <Copy size={15} />}
+                      </button>
+                    </div>
+
+                    <p className="mt-2 text-[10px] leading-4 text-violet-500/80">
+                      Share this code with people you want to invite.
+                    </p>
+
+                    {codeCopied && (
+                      <p className="mt-2 text-[10px] font-semibold text-emerald-600">
+                        Invite code copied!
+                      </p>
+                    )}
+                  </div>
                 )}
 
-                <div className="mt-6 space-y-2">
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      rounded-[15px]
-                      border
-                      border-slate-100
-                      bg-slate-50
-                      p-3
-                    "
-                  >
-                    <Users size={17} className="text-violet-500" />
+                {/* =================================================
+            PARTICIPANTS
+        ================================================== */}
 
+                <div className={conversation?.isPrivate ? "mt-6" : "mt-2"}>
+                  <div className="mb-3 flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-bold text-slate-800">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
                         Participants
                       </p>
 
-                      <p className="text-[10px] text-slate-400">
-                        {participantCount} people
+                      <p className="mt-1 text-xs font-semibold text-slate-800">
+                        {participantCount}{" "}
+                        {participantCount === 1 ? "person" : "people"}
                       </p>
                     </div>
+
+                    <Users size={16} className="text-violet-500" />
                   </div>
 
-                  <div
-                    className="
+                  <div className="space-y-1">
+                    {conversation?.participants?.length ? (
+                      conversation.participants.map((participant) => {
+                        const user = participant.user;
+                        const isCurrentUser = user.id === currentUserId;
+
+                        return (
+                          <div
+                            key={participant.id}
+                            className="
                       flex
                       items-center
                       gap-3
-                      rounded-[15px]
-                      border
-                      border-slate-100
-                      bg-slate-50
-                      p-3
+                      rounded-xl
+                      px-2.5
+                      py-2
+                      transition
+                      hover:bg-slate-50
                     "
-                  >
-                    <MessageCircle size={17} className="text-violet-500" />
+                          >
+                            {/* Avatar */}
 
-                    <div>
-                      <p className="text-xs font-bold text-slate-800">
-                        Messages
-                      </p>
+                            <div
+                              className="
+                        grid
+                        h-9
+                        w-9
+                        shrink-0
+                        place-items-center
+                        overflow-hidden
+                        rounded-[11px]
+                        bg-gradient-to-br
+                        from-violet-500
+                        to-indigo-600
+                        text-[10px]
+                        font-black
+                        text-white
+                      "
+                            >
+                              {user.avatarUrl ? (
+                                <img
+                                  src={user.avatarUrl}
+                                  alt=""
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                user.username.charAt(0).toUpperCase()
+                              )}
+                            </div>
 
-                      <p className="text-[10px] text-slate-400">
-                        {messageCount} messages
-                      </p>
-                    </div>
+                            {/* User info */}
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex min-w-0 items-center gap-1.5">
+                                <p className="truncate text-xs font-bold text-slate-800">
+                                  {user.username}
+                                </p>
+
+                                {isCurrentUser && (
+                                  <span className="shrink-0 text-[9px] font-semibold text-violet-500">
+                                    You
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center">
+                        <p className="text-[10px] font-medium text-slate-400">
+                          No participants found.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           </aside>
+        )}
+
+        {/* =====================================================
+    DELETE CONVERSATION CONFIRMATION
+===================================================== */}
+
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center px-5">
+            <button
+              type="button"
+              aria-label="Close delete confirmation"
+              onClick={() => {
+                if (!conversationActionLoading) {
+                  setShowDeleteConfirm(false);
+                }
+              }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+
+            <div className="relative z-10 w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <Trash2 size={19} />
+              </div>
+
+              <h2 className="mt-5 text-xl font-black tracking-tight text-slate-950">
+                Delete conversation?
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                This will permanently delete{" "}
+                <span className="font-semibold text-slate-700">
+                  {conversationTitle}
+                </span>{" "}
+                and all of its messages. This action cannot be undone.
+              </p>
+
+              {conversationActionError && (
+                <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {conversationActionError}
+                </p>
+              )}
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  disabled={conversationActionLoading}
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="
+            flex-1
+            rounded-full
+            border
+            border-slate-200
+            px-4
+            py-3
+            text-sm
+            font-semibold
+            text-slate-600
+            transition
+            hover:bg-slate-50
+            disabled:opacity-50
+          "
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  disabled={conversationActionLoading}
+                  onClick={() => void handleDeleteConversation()}
+                  className="
+            flex-1
+            rounded-full
+            bg-red-600
+            px-4
+            py-3
+            text-sm
+            font-semibold
+            text-white
+            transition
+            hover:bg-red-500
+            disabled:cursor-not-allowed
+            disabled:opacity-50
+          "
+                >
+                  {conversationActionLoading
+                    ? "Deleting..."
+                    : "Delete conversation"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* =====================================================
+    LEAVE CONVERSATION CONFIRMATION
+===================================================== */}
+
+        {showLeaveConfirm && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center px-5">
+            <button
+              type="button"
+              aria-label="Close leave confirmation"
+              onClick={() => {
+                if (!conversationActionLoading) {
+                  setShowLeaveConfirm(false);
+                }
+              }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            />
+
+            <div className="relative z-10 w-full max-w-md rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                <ArrowLeft size={19} />
+              </div>
+
+              <h2 className="mt-5 text-xl font-black tracking-tight text-slate-950">
+                Leave conversation?
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                You will leave{" "}
+                <span className="font-semibold text-slate-700">
+                  {conversationTitle}
+                </span>
+                . You can rejoin this conversation later if it's available to
+                you.
+              </p>
+
+              {conversationActionError && (
+                <p className="mt-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {conversationActionError}
+                </p>
+              )}
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  disabled={conversationActionLoading}
+                  onClick={() => setShowLeaveConfirm(false)}
+                  className="
+            flex-1
+            rounded-full
+            border
+            border-slate-200
+            px-4
+            py-3
+            text-sm
+            font-semibold
+            text-slate-600
+            transition
+            hover:bg-slate-50
+            disabled:opacity-50
+          "
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  disabled={conversationActionLoading}
+                  onClick={() => void handleLeaveConversation()}
+                  className="
+            flex-1
+            rounded-full
+            bg-slate-950
+            px-4
+            py-3
+            text-sm
+            font-semibold
+            text-white
+            transition
+            hover:bg-slate-800
+            disabled:cursor-not-allowed
+            disabled:opacity-50
+          "
+                >
+                  {conversationActionLoading
+                    ? "Leaving..."
+                    : "Leave conversation"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

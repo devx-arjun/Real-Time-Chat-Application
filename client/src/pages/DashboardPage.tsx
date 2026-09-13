@@ -1,41 +1,11 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useTheme } from "../context/ThemeContext";
-import { useAuth } from "../context/useAuth";
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
-  getMySpaces,
-  getDiscoverableSpaces,
-  joinSpace,
-  type Space,
-} from "../api/space.api";
-import { api } from "../api/client";
-
-function getAccent(index: number) {
-  const accents = [
-    {
-      glow: "bg-violet-500/20",
-      icon: "bg-violet-500/10 text-violet-400",
-      line: "from-violet-500 to-fuchsia-500",
-    },
-    {
-      glow: "bg-cyan-500/20",
-      icon: "bg-cyan-500/10 text-cyan-400",
-      line: "from-cyan-500 to-blue-500",
-    },
-    {
-      glow: "bg-fuchsia-500/20",
-      icon: "bg-fuchsia-500/10 text-fuchsia-400",
-      line: "from-fuchsia-500 to-violet-500",
-    },
-    {
-      glow: "bg-emerald-500/20",
-      icon: "bg-emerald-500/10 text-emerald-400",
-      line: "from-emerald-500 to-cyan-500",
-    },
-  ];
-
-  return accents[index % accents.length];
-}
+  getMyPrivateConversations,
+  type Conversation,
+} from "../api/conversation.api";
+import { useAuth } from "../context/useAuth";
+import { getMySpaces, type Space } from "../api/space.api";
 
 function SearchIcon() {
   return (
@@ -48,50 +18,6 @@ function SearchIcon() {
     >
       <circle cx="11" cy="11" r="7" />
       <path d="m20 20-4-4" />
-    </svg>
-  );
-}
-
-function SunIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-[18px] w-[18px]"
-    >
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-[18px] w-[18px]"
-    >
-      <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.6 8.6 0 1 0 11 11Z" />
-    </svg>
-  );
-}
-
-function ArrowUpRightIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      className="h-4 w-4"
-    >
-      <path d="M7 17 17 7" />
-      <path d="M8 7h9v9" />
     </svg>
   );
 }
@@ -110,16 +36,46 @@ function PlusIcon() {
   );
 }
 
-function CloseIcon() {
+function ChatIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
-      className="h-5 w-5"
+      className="h-4 w-4"
     >
-      <path d="m6 6 12 12M18 6 6 18" />
+      <path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.5 8.5 0 0 1-3.2-.6L4 20l1.6-3.8A7.2 7.2 0 0 1 4.5 12 7.5 7.5 0 0 1 12 4.5a7.5 7.5 0 0 1 8 7Z" />
+    </svg>
+  );
+}
+
+function LinkIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="h-4 w-4"
+    >
+      <path d="M10 13.5a4 4 0 0 0 5.8.2l2-2a4 4 0 0 0-5.7-5.6l-1.2 1.2" />
+      <path d="M14 10.5a4 4 0 0 0-5.8-.2l-2 2a4 4 0 0 0 5.7 5.6l1.2-1.2" />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="h-4 w-4"
+    >
+      <path d="M5 12h13" />
+      <path d="m13 6 6 6-6 6" />
     </svg>
   );
 }
@@ -139,214 +95,104 @@ function SparkleIcon() {
   );
 }
 
-function SpaceSkeleton({ isLight }: { isLight: boolean }) {
+function SpaceSkeleton() {
   return (
-    <div
-      className={`overflow-hidden rounded-[26px] border p-6 ${
-        isLight
-          ? "border-slate-200 bg-white"
-          : "border-white/[0.07] bg-white/[0.025]"
-      }`}
-    >
+    <div className="rounded-2xl border border-slate-200 bg-white p-5">
       <div className="animate-pulse">
-        <div
-          className={`h-11 w-11 rounded-2xl ${
-            isLight ? "bg-slate-100" : "bg-white/[0.06]"
-          }`}
-        />
-
-        <div
-          className={`mt-5 h-5 w-40 rounded ${
-            isLight ? "bg-slate-100" : "bg-white/[0.06]"
-          }`}
-        />
-
-        <div
-          className={`mt-3 h-3 w-3/4 rounded ${
-            isLight ? "bg-slate-100" : "bg-white/[0.06]"
-          }`}
-        />
-
-        <div
-          className={`mt-2 h-3 w-1/2 rounded ${
-            isLight ? "bg-slate-100" : "bg-white/[0.06]"
-          }`}
-        />
-
-        <div
-          className={`mt-7 h-3 w-32 rounded ${
-            isLight ? "bg-slate-100" : "bg-white/[0.06]"
-          }`}
-        />
+        <div className="h-9 w-9 rounded-xl bg-slate-100" />
+        <div className="mt-4 h-4 w-36 rounded bg-slate-100" />
+        <div className="mt-2 h-3 w-24 rounded bg-slate-100" />
+        <div className="mt-5 h-3 w-20 rounded bg-slate-100" />
       </div>
     </div>
   );
 }
 
-function SpaceCard({
-  space,
-  index,
-  isLight,
-}: {
-  space: Space;
-  index: number;
-  isLight: boolean;
-}) {
-  const accent = getAccent(index);
-
-  return (
-    <Link
-      to={`/space/${space.id}`}
-      className={`group relative block overflow-hidden rounded-[26px] border transition-all duration-300 hover:-translate-y-1 ${
-        isLight
-          ? "border-slate-200/80 bg-white shadow-[0_12px_45px_rgba(15,23,42,0.035)] hover:border-violet-200 hover:shadow-[0_20px_60px_rgba(109,40,217,0.10)]"
-          : "border-white/[0.07] bg-white/[0.025] hover:border-white/[0.13] hover:bg-white/[0.045] hover:shadow-[0_20px_70px_rgba(0,0,0,0.25)]"
-      }`}
-    >
-      {/* Accent glow */}
-      <div
-        className={`pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full blur-[70px] ${accent.glow} opacity-50 transition duration-500 group-hover:scale-125 group-hover:opacity-80`}
-      />
-
-      {/* Top accent line */}
-      <div
-        className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${accent.line} opacity-0 transition-opacity duration-300 group-hover:opacity-70`}
-      />
-
-      <div className="relative p-6 sm:p-7">
-        <div className="flex items-start justify-between gap-5">
-          <div
-            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${accent.icon}`}
-          >
-            <span className="text-xl font-semibold">#</span>
-          </div>
-
-          <div
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${
-              isLight
-                ? "border-slate-200 text-slate-300 group-hover:border-violet-200 group-hover:text-violet-500"
-                : "border-white/[0.07] text-white/20 group-hover:border-violet-400/20 group-hover:text-violet-300"
-            }`}
-          >
-            <ArrowUpRightIcon />
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <div className="flex items-center gap-2.5">
-            <h3 className="truncate text-lg font-semibold tracking-tight">
-              {space.name}
-            </h3>
-
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-            </span>
-          </div>
-
-          <p
-            className={`mt-2 line-clamp-2 min-h-[42px] text-sm leading-5 ${
-              isLight ? "text-slate-500" : "text-white/35"
-            }`}
-          >
-            {space.description || "A place for people to connect and talk."}
-          </p>
-        </div>
-
-        {space._count && (
-          <div
-            className={`mt-7 flex items-center gap-3 border-t pt-4 text-[11px] ${
-              isLight
-                ? "border-slate-100 text-slate-400"
-                : "border-white/[0.06] text-white/25"
-            }`}
-          >
-            <span className="inline-flex items-center gap-1.5">
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  isLight ? "bg-violet-400" : "bg-violet-400/70"
-                }`}
-              />
-              {space._count.members}{" "}
-              {space._count.members === 1 ? "member" : "members"}
-            </span>
-
-            <span className={isLight ? "text-slate-200" : "text-white/10"}>
-              /
-            </span>
-
-            <span>
-              {space._count.conversations}{" "}
-              {space._count.conversations === 1
-                ? "conversation"
-                : "conversations"}
-            </span>
-          </div>
-        )}
-      </div>
-    </Link>
-  );
-}
+const accentStyles = [
+  {
+    icon: "bg-violet-500/10 text-violet-600",
+    rail: "bg-violet-500",
+  },
+  {
+    icon: "bg-cyan-500/10 text-cyan-600",
+    rail: "bg-cyan-500",
+  },
+  {
+    icon: "bg-fuchsia-500/10 text-fuchsia-600",
+    rail: "bg-fuchsia-500",
+  },
+  {
+    icon: "bg-emerald-500/10 text-emerald-600",
+    rail: "bg-emerald-500",
+  },
+];
 
 export default function DashboardPage() {
   const { guest } = useAuth();
-  const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
-
+  console.log("DASHBOARD GUEST:", guest);
   const [search, setSearch] = useState("");
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [spacesLoading, setSpacesLoading] = useState(true);
   const [spacesError, setSpacesError] = useState("");
 
-  const [discoverableSpaces, setDiscoverableSpaces] = useState<Space[]>([]);
-  const [discoverLoading, setDiscoverLoading] = useState(true);
-  const [joiningSpaceId, setJoiningSpaceId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
 
-  const [showCreateSpace, setShowCreateSpace] = useState(false);
-  const [spaceName, setSpaceName] = useState("");
-  const [spaceDescription, setSpaceDescription] = useState("");
-  const [creatingSpace, setCreatingSpace] = useState(false);
-  const [createSpaceError, setCreateSpaceError] = useState<string | null>(null);
+  const storedUsername = localStorage.getItem("linkup_username");
 
-  const isLight = theme === "light";
+  const username = guest?.username || storedUsername || "there";
 
-  const avatarLetter =
-    guest?.username?.charAt(0).toUpperCase() ||
-    localStorage.getItem("linkup_username")?.charAt(0).toUpperCase() ||
-    "L";
+  const avatarLetter = username.charAt(0).toUpperCase();
+
+  const formattedDate = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
+
+  const hour = new Date().getHours();
+
+  const greeting =
+    hour < 5
+      ? "Night"
+      : hour < 12
+        ? "Morning"
+        : hour < 18
+          ? "Afternoon"
+          : "Evening";
 
   useEffect(() => {
     if (!guest) {
       setSpaces([]);
-      setDiscoverableSpaces([]);
+      setConversations([]);
       setSpacesLoading(false);
-      setDiscoverLoading(false);
+      setConversationsLoading(false);
       return;
     }
 
-    async function loadSpaces() {
+    async function loadDashboard() {
       try {
         setSpacesLoading(true);
-        setDiscoverLoading(true);
+        setConversationsLoading(true);
         setSpacesError("");
 
-        const [mySpaces, discoverable] = await Promise.all([
+        const [mySpaces, myConversations] = await Promise.all([
           getMySpaces(),
-          getDiscoverableSpaces(),
+          getMyPrivateConversations(),
         ]);
 
         setSpaces(mySpaces);
-        setDiscoverableSpaces(discoverable);
+        setConversations(myConversations);
       } catch (error) {
-        console.error("Failed to load spaces:", error);
+        console.error("Failed to load dashboard:", error);
         setSpacesError("Unable to load your spaces.");
       } finally {
         setSpacesLoading(false);
-        setDiscoverLoading(false);
+        setConversationsLoading(false);
       }
     }
 
-    loadSpaces();
+    void loadDashboard();
   }, [guest]);
 
   const filteredSpaces = useMemo(() => {
@@ -364,458 +210,394 @@ export default function DashboardPage() {
     });
   }, [spaces, search]);
 
-  async function handleJoinSpace(spaceId: string) {
-    try {
-      setJoiningSpaceId(spaceId);
-
-      await joinSpace(spaceId);
-
-      const joinedSpace = discoverableSpaces.find(
-        (space) => space.id === spaceId,
-      );
-
-      if (joinedSpace) {
-        setSpaces((current) => [
-          {
-            ...joinedSpace,
-            role: "MEMBER",
-          },
-          ...current,
-        ]);
-      }
-
-      setDiscoverableSpaces((current) =>
-        current.filter((space) => space.id !== spaceId),
-      );
-    } catch (error) {
-      console.error("Failed to join space:", error);
-    } finally {
-      setJoiningSpaceId(null);
-    }
+  function openCreateSpace() {
+    window.dispatchEvent(new Event("linkup:create-space"));
   }
 
-  async function handleCreateSpace(event: FormEvent) {
-    event.preventDefault();
-
-    const name = spaceName.trim();
-    const description = spaceDescription.trim();
-    const guestId = localStorage.getItem("linkup_guest_id");
-
-    if (!guestId) {
-      setCreateSpaceError("Guest session not found");
-      return;
-    }
-
-    if (name.length < 2) {
-      setCreateSpaceError("Space name must be at least 2 characters");
-      return;
-    }
-
-    try {
-      setCreatingSpace(true);
-      setCreateSpaceError(null);
-
-      const response = await api.post(
-        "/spaces",
-        {
-          name,
-          description: description || undefined,
-        },
-        {
-          headers: {
-            "x-guest-id": guestId,
-          },
-        },
-      );
-
-      const newSpace = response.data.space;
-
-      setSpaces((current) => [newSpace, ...current]);
-      setShowCreateSpace(false);
-      setSpaceName("");
-      setSpaceDescription("");
-
-      navigate(`/space/${newSpace.id}`);
-    } catch (error) {
-      console.error("Failed to create space:", error);
-
-      setCreateSpaceError(
-        error instanceof Error ? error.message : "Failed to create space",
-      );
-    } finally {
-      setCreatingSpace(false);
-    }
+  function openPrivateConversation() {
+    window.dispatchEvent(new Event("linkup:create-private-conversation"));
   }
 
-  function closeCreateModal() {
-    if (creatingSpace) return;
-
-    setShowCreateSpace(false);
-    setCreateSpaceError(null);
+  function openJoinConversation() {
+    window.dispatchEvent(new Event("linkup:join-conversation"));
   }
 
   return (
-    <main
-      className={`relative min-h-screen overflow-hidden ${
-        isLight ? "bg-[#f8f9fc] text-slate-950" : "bg-[#06060b] text-white"
-      }`}
-    >
-      {/* Ambient background */}
+    <main className="relative min-h-screen text-slate-950">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        {" "}
+        {/* Violet glow */}{" "}
+        <div className="absolute -left-40 -top-40 h-[32rem] w-[32rem] rounded-full bg-violet-300/20 blur-[140px]" />{" "}
+        {/* Cyan glow */}{" "}
+        <div className="absolute -right-48 top-[25%] h-[36rem] w-[36rem] rounded-full bg-cyan-300/15 blur-[150px]" />{" "}
+        {/* Fuchsia glow */}{" "}
+        <div className="absolute bottom-[-14rem] left-[35%] h-[30rem] w-[30rem] rounded-full bg-fuchsia-300/15 blur-[150px]" />{" "}
+        {/* Grid */}{" "}
         <div
-          className={`absolute -left-[18rem] -top-[18rem] h-[42rem] w-[42rem] rounded-full blur-[150px] ${
-            isLight ? "bg-violet-300/20" : "bg-violet-600/[0.08]"
-          }`}
-        />
-
-        <div
-          className={`absolute -right-[18rem] top-[15%] h-[40rem] w-[40rem] rounded-full blur-[160px] ${
-            isLight ? "bg-cyan-300/15" : "bg-cyan-500/[0.055]"
-          }`}
-        />
-
-        <div
-          className={`absolute bottom-[-20rem] left-[30%] h-[40rem] w-[40rem] rounded-full blur-[160px] ${
-            isLight ? "bg-fuchsia-300/10" : "bg-fuchsia-500/[0.04]"
-          }`}
-        />
-
-        <div
-          className={`absolute inset-0 ${
-            isLight ? "opacity-[0.025]" : "opacity-[0.035]"
-          }`}
+          className="absolute inset-0 opacity-[0.025]"
           style={{
-            backgroundImage: isLight
-              ? `
-                linear-gradient(rgba(15,23,42,.8) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(15,23,42,.8) 1px, transparent 1px)
-              `
-              : `
-                linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px)
-              `,
-            backgroundSize: "56px 56px",
+            backgroundImage: ` linear-gradient(rgba(15,23,42,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,.8) 1px, transparent 1px) `,
+            backgroundSize: "48px 48px",
           }}
-        />
+        />{" "}
+        {/* Fine dot texture */}{" "}
+        <div
+          className="absolute inset-0 opacity-[0.025]"
+          style={{
+            backgroundImage: ` radial-gradient( circle at 20% 20%, currentColor .6px, transparent .7px ), radial-gradient( circle at 80% 70%, currentColor .6px, transparent .7px ) `,
+            backgroundSize: "17px 17px, 23px 23px",
+          }}
+        />{" "}
       </div>
+      <div className="mx-auto max-w-[1300px] px-4 pb-20 pt-8 sm:px-6 lg:px-8">
+        {/* Intro */}
+        <section className="relative py-8 sm:py-12 lg:py-16">
+          <div className="relative max-w-4xl">
+            <div className="mb-5 flex items-center gap-2">
+              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
 
-      <div className="relative z-10 mx-auto min-h-screen max-w-[1500px] px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <header
-          className={`sticky top-0 z-40 flex h-[76px] items-center justify-end backdrop-blur-lg `}
-        >
-          {/* Center date */}
-          <div className="absolute left-1/2 hidden -translate-x-1/2 lg:block">
-            <p
-              className={`text-[10px] font-medium uppercase tracking-[0.24em] ${
-                isLight ? "text-slate-400" : "text-white/25"
-              }`}
-            >
-              {new Intl.DateTimeFormat("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              }).format(new Date())}
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                {greeting} · Your LinkUp
+              </p>
+            </div>
+
+            <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-8xl">
+              Welcome back,
+              <br />
+              <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
+                {username}.
+              </span>
+            </h1>
+
+            <p className="mt-7 max-w-2xl text-base leading-7 text-slate-500">
+              Pick up where you left off, jump into a conversation, or find a
+              space that feels like yours.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={openCreateSpace}
+                className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(15,23,42,0.14)] transition hover:-translate-y-0.5 hover:bg-violet-600"
+              >
+                <PlusIcon />
+                Create a space
+              </button>
+
+              <button
+                type="button"
+                onClick={openPrivateConversation}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 backdrop-blur-sm transition hover:-translate-y-0.5 hover:border-violet-200 hover:text-violet-600"
+              >
+                <ChatIcon />
+                Start a conversation
+              </button>
+
+              <button
+                type="button"
+                onClick={openJoinConversation}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 px-5 py-3 text-sm font-semibold text-slate-500 transition hover:-translate-y-0.5 hover:border-cyan-200 hover:text-cyan-600"
+              >
+                <LinkIcon />
+                Join with code
+              </button>
+            </div>
+          </div>
+
+          <div className="pointer-events-none absolute -right-0 top-20 hidden select-none text-[17rem] font-black leading-[0.8] tracking-[-0.12em] text-slate-900/[0.035] lg:block">
+            {avatarLetter}
+          </div>
+
+          <div className="pointer-events-none absolute right-0 top-14 z-10 hidden text-right lg:block">
+            <p className="text-6xl font-semibold tracking-[-0.07em] text-slate-950">
+              {formattedDate.split(",")[0]}
+            </p>
+
+            <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-slate-400">
+              {formattedDate.split(",").slice(1).join(",").trim()}
             </p>
           </div>
-        </header>
+        </section>
 
-        <div className="pt-4 md:hidden">
-          <div
-            className={`flex h-11 items-center gap-3 rounded-xl border px-3.5 ${
-              isLight
-                ? "border-slate-200 bg-white"
-                : "border-white/[0.07] bg-white/[0.035]"
-            }`}
-          >
-            <span className={isLight ? "text-slate-400" : "text-white/30"}>
+        {/* Search */}
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-md">
+            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
               <SearchIcon />
             </span>
 
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search spaces..."
-              className={`w-full bg-transparent text-sm outline-none ${
-                isLight
-                  ? "text-slate-800 placeholder:text-slate-400"
-                  : "text-white placeholder:text-white/25"
-              }`}
+              placeholder="Search your spaces..."
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white/80 pl-10 pr-10 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-violet-300 focus:ring-4 focus:ring-violet-500/5"
             />
 
             {search && (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className={isLight ? "text-slate-400" : "text-white/30"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-lg leading-none text-slate-400 transition hover:text-slate-700"
+                aria-label="Clear search"
               >
                 ×
               </button>
             )}
           </div>
+
+          {search && !spacesLoading && (
+            <p className="text-xs text-slate-400">
+              {filteredSpaces.length}{" "}
+              {filteredSpaces.length === 1 ? "space" : "spaces"} found
+            </p>
+          )}
         </div>
+        {/* Jump back in */}
+        <section className="mt-12">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
+                Jump back in
+              </p>
 
-        <section className="relative py-14 sm:py-16 lg:py-20">
-          <div className="max-w-3xl">
-            <p
-              className={`mb-4 text-base font-medium ${
-                isLight ? "text-violet-600" : "text-violet-300"
-              }`}
-            >
-              Welcome back
-            </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+                Your conversations
+              </h2>
+            </div>
 
-            <h1 className="text-5xl font-semibold tracking-[-0.04em] sm:text-6xl lg:text-7xl">
-              Good to see you,{" "}
-              <span className={isLight ? "text-slate-950" : "text-white"}>
-                {guest?.username || "there"}
-              </span>
-              .
-            </h1>
-
-            <p
-              className={`mt-6 max-w-2xl text-lg leading-8 ${
-                isLight ? "text-slate-500" : "text-white/45"
-              }`}
-            >
-              See what your people are talking about and jump back into the
-              conversations that matter to you.
-            </p>
+            {conversations.length > 0 && (
+              <Link
+                to="/chats"
+                className="hidden items-center gap-2 text-xs font-semibold text-slate-500 transition hover:text-violet-600 sm:flex"
+              >
+                See all
+                <ArrowIcon />
+              </Link>
+            )}
           </div>
 
-          <div
-            className={`pointer-events-none absolute right-0 top-6 hidden select-none text-[17rem] font-black leading-none tracking-[-0.12em] lg:block ${
-              isLight ? "text-slate-900/[0.025]" : "text-white/[0.02]"
-            }`}
-          >
-            {avatarLetter}
-          </div>
+          {conversationsLoading ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="h-28 animate-pulse rounded-2xl bg-white/70" />
+              <div className="h-28 animate-pulse rounded-2xl bg-white/70" />
+            </div>
+          ) : conversations.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {conversations.slice(0, 4).map((conversation, index) => {
+                const accent = accentStyles[index % accentStyles.length];
+
+                return (
+                  <Link
+                    key={conversation.id}
+                    to={`/chat/${conversation.id}`}
+                    className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-1 hover:border-violet-200 hover:shadow-[0_16px_38px_rgba(60,40,120,0.08)]"
+                  >
+                    <span
+                      className={`absolute inset-y-0 left-0 w-1 ${accent.rail} transition-all duration-200 group-hover:w-1.5`}
+                    />
+
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 gap-3">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent.icon}`}
+                        >
+                          <ChatIcon />
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+
+                            <h3 className="truncate text-sm font-semibold text-slate-900">
+                              {conversation.title || "Private conversation"}
+                            </h3>
+                          </div>
+
+                          <p className="mt-1 text-xs text-slate-400">
+                            {conversation._count.participants}{" "}
+                            {conversation._count.participants === 1
+                              ? "participant"
+                              : "participants"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className="mt-1 text-slate-300 transition duration-200 group-hover:translate-x-1 group-hover:text-violet-500">
+                        <ArrowIcon />
+                      </span>
+                    </div>
+
+                    <div className="mt-5 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.12em] text-slate-400">
+                      <span>{conversation._count.messages} messages</span>
+                      <span className="h-1 w-1 rounded-full bg-slate-300" />
+                      <span>Private</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/40 px-6 py-10">
+              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                    <ChatIcon />
+                  </div>
+
+                  <h3 className="mt-4 text-base font-semibold text-slate-900">
+                    Nothing to jump back into yet
+                  </h3>
+
+                  <p className="mt-1 max-w-md text-sm leading-6 text-slate-400">
+                    Start a private conversation and your latest chats will
+                    appear here.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={openPrivateConversation}
+                  className="inline-flex items-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-violet-600"
+                >
+                  <PlusIcon />
+                  Start a conversation
+                </button>
+              </div>
+            </div>
+          )}
         </section>
-
-        {/* Content */}
-        <section className="pb-20">
-          <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        {/* Spaces */}
+        <section className="mt-14">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <p
-                  className={`text-[10px] font-semibold uppercase tracking-[0.25em] ${
-                    isLight ? "text-slate-400" : "text-white/25"
-                  }`}
-                >
+                <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
                   Your spaces
                 </p>
 
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
-                    isLight
-                      ? "bg-slate-100 text-slate-400"
-                      : "bg-white/[0.05] text-white/30"
-                  }`}
-                >
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-semibold text-slate-400">
                   {spaces.length}
                 </span>
               </div>
 
               <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                Places worth opening
+                Places you belong
               </h2>
             </div>
 
-            {search && !spacesLoading && (
-              <p
-                className={`text-xs ${
-                  isLight ? "text-slate-400" : "text-white/25"
-                }`}
-              >
-                {filteredSpaces.length}{" "}
-                {filteredSpaces.length === 1 ? "result" : "results"} for “
-                {search}”
-              </p>
-            )}
+            <button
+              type="button"
+              onClick={openCreateSpace}
+              className="inline-flex w-fit items-center gap-2 text-xs font-semibold text-violet-600 transition hover:text-violet-700"
+            >
+              <PlusIcon />
+              New space
+            </button>
           </div>
 
-          {/* Loading */}
           {spacesLoading && (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              <SpaceSkeleton isLight={isLight} />
-              <SpaceSkeleton isLight={isLight} />
-              <SpaceSkeleton isLight={isLight} />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <SpaceSkeleton />
+              <SpaceSkeleton />
+              <SpaceSkeleton />
             </div>
           )}
 
-          {/* Error */}
           {!spacesLoading && spacesError && (
-            <div
-              className={`rounded-[26px] border p-8 ${
-                isLight
-                  ? "border-red-200 bg-red-50/70"
-                  : "border-red-500/15 bg-red-500/[0.04]"
-              }`}
-            >
-              <div className="flex items-start gap-4">
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                    isLight
-                      ? "bg-red-100 text-red-500"
-                      : "bg-red-500/10 text-red-300"
-                  }`}
-                >
-                  !
-                </div>
+            <div className="rounded-2xl border border-red-200 bg-red-50/70 p-6">
+              <p className="text-sm font-semibold text-red-600">
+                Something went wrong
+              </p>
 
-                <div>
-                  <p
-                    className={`font-semibold ${
-                      isLight ? "text-red-600" : "text-red-300"
-                    }`}
-                  >
-                    Something went wrong
-                  </p>
-
-                  <p
-                    className={`mt-1 text-sm ${
-                      isLight ? "text-red-500/70" : "text-red-300/50"
-                    }`}
-                  >
-                    {spacesError}
-                  </p>
-                </div>
-              </div>
+              <p className="mt-1 text-sm text-red-500/70">{spacesError}</p>
             </div>
           )}
 
-          {/* Spaces */}
-          {!spacesLoading && filteredSpaces.length > 0 && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {filteredSpaces.map((space, index) => (
-                <Link
-                  to={`/space/${space.id}`}
-                  key={space.id}
-                  className={`group relative overflow-hidden rounded-xl border p-5 transition duration-200 hover:-translate-y-0.5 ${
-                    isLight
-                      ? "border-slate-200 bg-white hover:border-violet-200 hover:shadow-[0_10px_30px_rgba(60,40,120,.08)]"
-                      : "border-white/[0.07] bg-white/[0.025] hover:border-white/[0.12] hover:bg-white/[0.04]"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex min-w-0 items-center gap-3">
+          {!spacesLoading && !spacesError && filteredSpaces.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredSpaces.map((space, index) => {
+                const accent = accentStyles[index % accentStyles.length];
+
+                return (
+                  <Link
+                    key={space.id}
+                    to={`/space/${space.id}`}
+                    className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-1 hover:border-slate-300 hover:shadow-[0_16px_38px_rgba(30,40,70,0.07)]"
+                  >
+                    <span
+                      className={`absolute left-0 top-0 h-1 w-0 ${accent.rail} transition-all duration-300 group-hover:w-full`}
+                    />
+
+                    <div className="flex items-start justify-between gap-4">
                       <div
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ${
-                          index % 3 === 0
-                            ? "bg-violet-500/10 text-violet-500"
-                            : index % 3 === 1
-                              ? "bg-cyan-500/10 text-cyan-500"
-                              : "bg-fuchsia-500/10 text-fuchsia-500"
-                        }`}
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold ${accent.icon}`}
                       >
                         #
                       </div>
 
-                      <div className="min-w-0">
-                        <h3 className="truncate text-sm font-semibold">
-                          {space.name}
-                        </h3>
-
-                        <p
-                          className={`mt-0.5 text-xs ${
-                            isLight ? "text-slate-400" : "text-white/30"
-                          }`}
-                        >
-                          {space._count?.members ?? 0} members
-                        </p>
-                      </div>
+                      <span className="text-slate-300 transition duration-200 group-hover:translate-x-1 group-hover:text-slate-700">
+                        <ArrowIcon />
+                      </span>
                     </div>
 
-                    <span
-                      className={`text-lg transition-transform group-hover:translate-x-0.5 ${
-                        isLight ? "text-slate-300" : "text-white/20"
-                      }`}
-                    >
-                      →
-                    </span>
-                  </div>
+                    <h3 className="mt-5 truncate text-sm font-semibold text-slate-900">
+                      {space.name}
+                    </h3>
 
-                  {space.description && (
-                    <p
-                      className={`mt-4 line-clamp-2 text-xs leading-5 ${
-                        isLight ? "text-slate-500" : "text-white/35"
-                      }`}
-                    >
-                      {space.description}
+                    <p className="mt-1 text-xs text-slate-400">
+                      {space._count?.members ?? 0} members
                     </p>
-                  )}
 
-                  {space._count && (
-                    <div
-                      className={`mt-4 flex items-center gap-3 text-[10px] ${
-                        isLight ? "text-slate-400" : "text-white/25"
-                      }`}
-                    >
-                      <span>{space._count.conversations} conversations</span>
+                    {space.description && (
+                      <p className="mt-4 line-clamp-2 text-xs leading-5 text-slate-500">
+                        {space.description}
+                      </p>
+                    )}
 
-                      <span>·</span>
+                    <div className="mt-5 flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.1em] text-slate-400">
+                      <span>
+                        {space._count?.conversations ?? 0} conversations
+                      </span>
 
-                      <span>Active community</span>
+                      <span className="h-1 w-1 rounded-full bg-slate-300" />
+
+                      <span>{space.role || "Member"}</span>
                     </div>
-                  )}
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           )}
 
-          {/* No results */}
           {!spacesLoading && !spacesError && filteredSpaces.length === 0 && (
-            <div
-              className={`relative overflow-hidden rounded-[28px] border border-dashed px-6 py-16 text-center ${
-                isLight
-                  ? "border-slate-300 bg-white/40"
-                  : "border-white/[0.09] bg-white/[0.015]"
-              }`}
-            >
-              <div
-                className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${
-                  isLight
-                    ? "bg-slate-100 text-slate-400"
-                    : "bg-white/[0.04] text-white/25"
-                }`}
-              >
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/40 px-6 py-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
                 {search ? <SearchIcon /> : <SparkleIcon />}
               </div>
 
-              <h3 className="mt-5 text-lg font-semibold">
-                {search ? "Nothing matched that search" : "No spaces yet"}
+              <h3 className="mt-4 text-base font-semibold">
+                {search ? "No spaces found" : "No spaces yet"}
               </h3>
 
-              <p
-                className={`mx-auto mt-2 max-w-sm text-sm leading-6 ${
-                  isLight ? "text-slate-400" : "text-white/25"
-                }`}
-              >
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-400">
                 {search
-                  ? "Try another name or description, or clear your search."
-                  : "Create your first space and give your community somewhere to hang out."}
+                  ? "Try a different search or clear the current filter."
+                  : "Create your first space and give your community somewhere to gather."}
               </p>
 
               {search ? (
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className={`mt-6 rounded-xl px-4 py-2.5 text-sm font-medium ${
-                    isLight
-                      ? "bg-slate-950 text-white"
-                      : "bg-white text-slate-950"
-                  }`}
+                  className="mt-5 rounded-xl bg-slate-950 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-violet-600"
                 >
                   Clear search
                 </button>
               ) : (
                 <button
                   type="button"
-                  onClick={() => {
-                    setCreateSpaceError(null);
-                    setShowCreateSpace(true);
-                  }}
-                  className="mt-6 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-500"
+                  onClick={openCreateSpace}
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-violet-500"
                 >
                   <PlusIcon />
                   Create your first space
@@ -823,102 +605,62 @@ export default function DashboardPage() {
               )}
             </div>
           )}
-
-          {!discoverLoading && discoverableSpaces.length > 0 && (
-            <section className="mt-16">
-              <div className="mb-7">
-                <p
-                  className={`text-[10px] font-semibold uppercase tracking-[0.25em] ${
-                    isLight ? "text-slate-400" : "text-white/25"
-                  }`}
-                >
-                  Discover spaces
+        </section>
+        {/* Explore strip */}
+        <section className="mt-14 grid gap-3 lg:grid-cols-[1.35fr_0.65fr]">
+          <Link
+            to="/discover"
+            className="group relative overflow-hidden rounded-2xl border border-violet-200/70 bg-violet-50/60 p-6 transition duration-200 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_14px_35px_rgba(100,70,180,0.08)]"
+          >
+            <div className="relative z-10 flex items-center justify-between gap-6">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-violet-500">
+                  Explore
                 </p>
 
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
-                  Find somewhere new to belong
-                </h2>
+                <h3 className="mt-2 text-lg font-semibold text-slate-900">
+                  Find somewhere new to belong.
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-500">
+                  Browse spaces and discover communities outside your usual
+                  circle.
+                </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                {discoverableSpaces.map((space, index) => (
-                  <div
-                    key={space.id}
-                    className={`rounded-xl border p-5 ${
-                      isLight
-                        ? "border-slate-200 bg-white"
-                        : "border-white/[0.07] bg-white/[0.025]"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ${
-                            index % 3 === 0
-                              ? "bg-violet-500/10 text-violet-500"
-                              : index % 3 === 1
-                                ? "bg-cyan-500/10 text-cyan-500"
-                                : "bg-fuchsia-500/10 text-fuchsia-500"
-                          }`}
-                        >
-                          #
-                        </div>
+              <span className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-violet-600 shadow-sm transition group-hover:translate-x-1 sm:flex">
+                <ArrowIcon />
+              </span>
+            </div>
+          </Link>
 
-                        <div className="min-w-0">
-                          <h3 className="truncate text-sm font-semibold">
-                            {space.name}
-                          </h3>
+          <Link
+            to="/activity"
+            className="group rounded-2xl border border-slate-200 bg-white p-6 transition duration-200 hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-[0_14px_35px_rgba(30,140,180,0.07)]"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Your activity
+                </p>
 
-                          <p
-                            className={`mt-0.5 text-xs ${
-                              isLight ? "text-slate-400" : "text-white/30"
-                            }`}
-                          >
-                            {space._count?.members ?? 0} members
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        disabled={joiningSpaceId === space.id}
-                        onClick={() => handleJoinSpace(space.id)}
-                        className="shrink-0 rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {joiningSpaceId === space.id ? "Joining..." : "Join"}
-                      </button>
-                    </div>
-
-                    <p
-                      className={`mt-4 line-clamp-2 text-xs leading-5 ${
-                        isLight ? "text-slate-500" : "text-white/35"
-                      }`}
-                    >
-                      {space.description || "No description yet."}
-                    </p>
-
-                    <div
-                      className={`mt-4 text-[10px] ${
-                        isLight ? "text-slate-400" : "text-white/25"
-                      }`}
-                    >
-                      {space._count?.conversations ?? 0} conversations
-                    </div>
-                  </div>
-                ))}
+                <h3 className="mt-2 text-lg font-semibold text-slate-900">
+                  See what changed.
+                </h3>
               </div>
-            </section>
-          )}
+
+              <span className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-cyan-500">
+                <ArrowIcon />
+              </span>
+            </div>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Keep up with the things you've joined and created.
+            </p>
+          </Link>
         </section>
-
         {/* Footer */}
-        <footer
-          className={`flex flex-col gap-3 border-t py-6 text-[9px] font-medium uppercase tracking-[0.2em] sm:flex-row sm:items-center sm:justify-between ${
-            isLight
-              ? "border-slate-200/70 text-slate-400"
-              : "border-white/[0.055] text-white/20"
-          }`}
-        >
+        <footer className="mt-14 flex flex-col gap-3 border-t border-slate-200/70 pt-6 text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <span>LinkUp © 2026</span>
 
           <div className="flex items-center gap-3">
@@ -930,213 +672,6 @@ export default function DashboardPage() {
           </div>
         </footer>
       </div>
-
-      {/* Create Space Modal */}
-      {showCreateSpace && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <button
-            type="button"
-            aria-label="Close create space dialog"
-            onClick={closeCreateModal}
-            className="absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md"
-          />
-
-          {/* Modal */}
-          <form
-            onSubmit={handleCreateSpace}
-            className={`relative z-10 w-full max-w-lg overflow-hidden rounded-[30px] border shadow-2xl ${
-              isLight
-                ? "border-slate-200 bg-white shadow-slate-950/15"
-                : "border-white/[0.09] bg-[#0e0e17] shadow-black/50"
-            }`}
-          >
-            {/* Modal glow */}
-            <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-violet-500/15 blur-[80px]" />
-
-            <div className="relative">
-              {/* Header */}
-              <div
-                className={`flex items-start justify-between border-b px-6 py-6 sm:px-7 ${
-                  isLight ? "border-slate-100" : "border-white/[0.06]"
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
-                      isLight
-                        ? "bg-violet-50 text-violet-600"
-                        : "bg-violet-500/10 text-violet-300"
-                    }`}
-                  >
-                    <SparkleIcon />
-                  </div>
-
-                  <div>
-                    <p
-                      className={`text-[9px] font-semibold uppercase tracking-[0.22em] ${
-                        isLight ? "text-slate-400" : "text-white/25"
-                      }`}
-                    >
-                      New community
-                    </p>
-
-                    <h2 className="mt-1 text-xl font-semibold tracking-tight">
-                      Create a space
-                    </h2>
-
-                    <p
-                      className={`mt-1 text-xs leading-5 ${
-                        isLight ? "text-slate-400" : "text-white/30"
-                      }`}
-                    >
-                      Give your people somewhere to gather.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  disabled={creatingSpace}
-                  onClick={closeCreateModal}
-                  aria-label="Close"
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl transition ${
-                    isLight
-                      ? "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-                      : "text-white/30 hover:bg-white/[0.05] hover:text-white"
-                  }`}
-                >
-                  <CloseIcon />
-                </button>
-              </div>
-
-              {/* Form */}
-              <div className="space-y-5 px-6 py-6 sm:px-7">
-                <div>
-                  <div className="mb-2 flex items-center justify-between">
-                    <label
-                      htmlFor="space-name"
-                      className={`text-xs font-semibold ${
-                        isLight ? "text-slate-700" : "text-white/70"
-                      }`}
-                    >
-                      Space name
-                    </label>
-
-                    <span
-                      className={`text-[10px] ${
-                        isLight ? "text-slate-300" : "text-white/20"
-                      }`}
-                    >
-                      {spaceName.length}/50
-                    </span>
-                  </div>
-
-                  <input
-                    id="space-name"
-                    autoFocus
-                    value={spaceName}
-                    onChange={(event) => setSpaceName(event.target.value)}
-                    maxLength={50}
-                    placeholder="e.g. Photography"
-                    className={`h-12 w-full rounded-xl border px-4 text-sm outline-none transition-all ${
-                      isLight
-                        ? "border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-violet-300 focus:bg-white focus:ring-4 focus:ring-violet-500/10"
-                        : "border-white/[0.08] bg-white/[0.035] text-white placeholder:text-white/20 focus:border-violet-400/30 focus:bg-white/[0.05] focus:ring-4 focus:ring-violet-500/10"
-                    }`}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="space-description"
-                    className={`mb-2 block text-xs font-semibold ${
-                      isLight ? "text-slate-700" : "text-white/70"
-                    }`}
-                  >
-                    Description{" "}
-                    <span
-                      className={`font-normal ${
-                        isLight ? "text-slate-300" : "text-white/20"
-                      }`}
-                    >
-                      · optional
-                    </span>
-                  </label>
-
-                  <textarea
-                    id="space-description"
-                    value={spaceDescription}
-                    onChange={(event) =>
-                      setSpaceDescription(event.target.value)
-                    }
-                    rows={4}
-                    placeholder="What is this space about?"
-                    className={`w-full resize-none rounded-xl border px-4 py-3 text-sm leading-6 outline-none transition-all ${
-                      isLight
-                        ? "border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-violet-300 focus:bg-white focus:ring-4 focus:ring-violet-500/10"
-                        : "border-white/[0.08] bg-white/[0.035] text-white placeholder:text-white/20 focus:border-violet-400/30 focus:bg-white/[0.05] focus:ring-4 focus:ring-violet-500/10"
-                    }`}
-                  />
-                </div>
-
-                {createSpaceError && (
-                  <div
-                    className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${
-                      isLight
-                        ? "border-red-200 bg-red-50 text-red-500"
-                        : "border-red-500/15 bg-red-500/[0.05] text-red-300"
-                    }`}
-                  >
-                    <span className="font-bold">!</span>
-                    <p className="text-xs leading-5">{createSpaceError}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div
-                className={`flex gap-3 border-t px-6 py-5 sm:px-7 ${
-                  isLight
-                    ? "border-slate-100 bg-slate-50/60"
-                    : "border-white/[0.06] bg-white/[0.015]"
-                }`}
-              >
-                <button
-                  type="button"
-                  disabled={creatingSpace}
-                  onClick={closeCreateModal}
-                  className={`flex-1 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                    isLight
-                      ? "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                      : "border-white/[0.08] text-white/50 hover:bg-white/[0.04]"
-                  }`}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={creatingSpace || !spaceName.trim()}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-600/15 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {creatingSpace ? (
-                    <>
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <PlusIcon />
-                      Create space
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      )}
     </main>
   );
 }

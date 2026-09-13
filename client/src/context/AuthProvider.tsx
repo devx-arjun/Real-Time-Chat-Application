@@ -17,6 +17,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [guest, setGuest] = useState<Guest | null>(null);
+  console.log("AUTH PROVIDER RENDER:", guest);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       username: cleanUsername,
     });
 
+    console.log("CREATE GUEST RESULT:", newGuest);
     localStorage.setItem(GUEST_ID_KEY, newGuest.guestId);
     localStorage.setItem(USERNAME_KEY, newGuest.username);
 

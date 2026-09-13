@@ -1,19 +1,18 @@
 import {
-  Bell,
+  ArrowRight,
   ChevronDown,
   Compass,
   Home,
+  MessageCircle,
   Plus,
   Search,
+  UserRound,
+  X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { useAuth } from "../context/useAuth";
-
-type HeaderProps = {
-  unreadCount?: number;
-};
 
 const navigation = [
   {
@@ -26,21 +25,23 @@ const navigation = [
     path: "/discover",
     icon: Compass,
   },
-  {
-    label: "Activity",
-    path: "/activity",
-    icon: Bell,
-  },
 ];
 
-export default function Header({ unreadCount = 0 }: HeaderProps) {
+export default function Header() {
   const location = useLocation();
   const { guest } = useAuth();
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  const createMenuRef = useRef<HTMLDivElement | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
   const username = guest?.username || "Guest";
-  const avatarLetter = username.charAt(0).toUpperCase() || "?";
+  const avatarLetter = username.charAt(0).toUpperCase() || "L";
 
   const isActive = (path: string) => {
     if (path === "/home") {
@@ -50,16 +51,58 @@ export default function Header({ unreadCount = 0 }: HeaderProps) {
     return location.pathname.startsWith(path);
   };
 
-  const profileActive = location.pathname.startsWith("/profile");
+  function closeAllMenus() {
+    setMenuOpen(false);
+    setCreateOpen(false);
+    setProfileOpen(false);
+  }
 
   function handleSearch() {
     setSearchOpen(true);
+    setMenuOpen(false);
+    setCreateOpen(false);
+    setProfileOpen(false);
 
     window.dispatchEvent(new CustomEvent("linkup:search"));
+
+    window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 50);
+  }
+
+  function closeSearch() {
+    setSearchOpen(false);
   }
 
   function handleCreate() {
+    setCreateOpen((current) => !current);
+    setMenuOpen(false);
+    setProfileOpen(false);
+    setSearchOpen(false);
+  }
+
+  function openCreateSpace() {
+    closeAllMenus();
     window.dispatchEvent(new Event("linkup:create-space"));
+  }
+
+  function openCreatePrivateConversation() {
+    closeAllMenus();
+    window.dispatchEvent(
+      new Event("linkup:create-private-conversation"),
+    );
+  }
+
+  function openJoinConversation() {
+    closeAllMenus();
+    window.dispatchEvent(new Event("linkup:join-conversation"));
+  }
+
+  function toggleProfile() {
+    setProfileOpen((current) => !current);
+    setMenuOpen(false);
+    setCreateOpen(false);
+    setSearchOpen(false);
   }
 
   useEffect(() => {
@@ -77,6 +120,9 @@ export default function Header({ unreadCount = 0 }: HeaderProps) {
       }
 
       if (event.key === "Escape") {
+        setMenuOpen(false);
+        setCreateOpen(false);
+        setProfileOpen(false);
         setSearchOpen(false);
       }
     }
@@ -88,30 +134,66 @@ export default function Header({ unreadCount = 0 }: HeaderProps) {
     };
   }, []);
 
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target as Node;
+
+      if (
+        createMenuRef.current &&
+        !createMenuRef.current.contains(target)
+      ) {
+        setCreateOpen(false);
+      }
+
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(target)
+      ) {
+        setProfileOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    closeAllMenus();
+    setSearchOpen(false);
+  }, [location.pathname]);
+
   return (
-    <div className="relative bg-white">
-      <div className="mx-auto flex h-[68px] items-center gap-4 px-4 sm:px-6 lg:px-8">
-        <Link to="/app" className="group flex shrink-0 items-center gap-2.5">
+    <header className="sticky top-0 z-[100] w-full bg-white">
+      <nav className="relative mx-auto flex h-[72px] max-w-[1500px] items-center justify-between px-5 md:px-10 lg:px-16 xl:px-24">
+        {/* Logo */}
+        <Link
+          to="/home"
+          onClick={closeAllMenus}
+          className="group flex shrink-0 items-center gap-2.5"
+        >
           <div
             className="
               relative
-              grid
+              flex
               h-9
               w-9
-              place-items-center
+              items-center
+              justify-center
               rounded-[11px]
               bg-slate-950
               text-[15px]
               font-black
               tracking-[-0.04em]
               text-white
-              shadow-sm
               transition
-              duration-200
               group-hover:-translate-y-0.5
             "
           >
             L
+
             <span
               className="
                 absolute
@@ -127,390 +209,739 @@ export default function Header({ unreadCount = 0 }: HeaderProps) {
             />
           </div>
 
-          <span
-            className="
-              text-[18px]
-              font-black
-              tracking-[-0.045em]
-              text-slate-950
-            "
-          >
-            LinkUp
-          </span>
+          <div className="hidden sm:block">
+            <span className="block text-[18px] font-black leading-none tracking-[-0.055em] text-slate-950">
+              LinkUp
+            </span>
+
+            <span className="mt-1 block text-[8px] font-bold uppercase tracking-[0.18em] text-slate-400">
+              Connect better
+            </span>
+          </div>
         </Link>
-        <nav className="ml-4 hidden items-center gap-1 md:flex lg:ml-8">
+
+        {/* Desktop Navigation */}
+        <div className="hidden items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 p-1 md:flex">
           {navigation.map((item) => {
             const active = isActive(item.path);
-            const Icon = item.icon;
 
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`
-                  group
-                  relative
                   flex
                   items-center
                   gap-2
-                  rounded-xl
-                  px-3.5
-                  py-2
-                  text-[13px]
-                  font-bold
-                  transition
-                  duration-150
+                  rounded-full
+                  px-4
+                  py-1.5
+                  text-sm
+                  transition-all
+                  duration-200
                   ${
                     active
-                      ? "bg-slate-100 text-slate-950"
-                      : "text-slate-400 hover:bg-slate-50 hover:text-slate-900"
+                      ? "border border-zinc-200 bg-white font-medium text-zinc-800 shadow-sm"
+                      : "border border-transparent text-zinc-500 hover:text-zinc-800"
                   }
                 `}
               >
-                <Icon
-                  size={16}
-                  strokeWidth={active ? 2.1 : 1.8}
-                  className={
-                    active
-                      ? "text-violet-600"
-                      : "text-slate-400 transition-colors group-hover:text-slate-700"
-                  }
-                />
-
-                <span>{item.label}</span>
-
-                {item.label === "Activity" && unreadCount > 0 && (
-                  <span
-                    className="
-                        flex
-                        h-4
-                        min-w-4
-                        items-center
-                        justify-center
-                        rounded-full
-                        bg-violet-600
-                        px-1
-                        text-[8px]
-                        font-black
-                        text-white
-                      "
-                  >
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </span>
-                )}
-
-                {active && (
-                  <span
-                    className="
-                      absolute
-                      bottom-[-12px]
-                      left-1/2
-                      h-[2px]
-                      w-5
-                      -translate-x-1/2
-                      rounded-full
-                      bg-violet-600
-                    "
-                  />
-                )}
+                {item.label}
               </Link>
             );
           })}
-        </nav>
 
-        {/* ===================================================
-            RIGHT CONTROLS
-        ==================================================== */}
+          {/* Create */}
+          <div ref={createMenuRef} className="relative">
+            <button
+              type="button"
+              onClick={handleCreate}
+              aria-haspopup="menu"
+              aria-expanded={createOpen}
+              className={`
+                flex
+                items-center
+                gap-1.5
+                rounded-full
+                px-4
+                py-1.5
+                text-sm
+                transition-all
+                ${
+                  createOpen
+                    ? "bg-white font-medium text-zinc-800 shadow-sm"
+                    : "text-zinc-500 hover:text-zinc-800"
+                }
+              `}
+            >
+              Connect
+              <ChevronDown
+                size={13}
+                className={`transition-transform ${
+                  createOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
 
-        <div className="ml-auto flex items-center gap-1.5">
+            {createOpen && (
+              <div
+                role="menu"
+                className="
+                  absolute
+                  left-1/2
+                  top-[calc(100%+12px)]
+                  z-50
+                  w-[280px]
+                  -translate-x-1/2
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-zinc-200
+                  bg-white
+                  p-2
+                  shadow-[0_20px_60px_rgba(15,23,42,0.12)]
+                "
+              >
+                <CreateMenuItem
+                  icon={<Plus size={17} />}
+                  iconClass="bg-violet-50 text-violet-600"
+                  title="Create a Space"
+                  description="Build a community around a topic"
+                  onClick={openCreateSpace}
+                />
+
+                <CreateMenuItem
+                  icon={<MessageCircle size={17} />}
+                  iconClass="bg-emerald-50 text-emerald-600"
+                  title="Private Conversation"
+                  description="Start a private chat with a code"
+                  onClick={openCreatePrivateConversation}
+                />
+
+                <div className="my-1.5 border-t border-zinc-100" />
+
+                <CreateMenuItem
+                  icon={<ArrowRight size={17} />}
+                  iconClass="bg-zinc-100 text-zinc-600"
+                  title="Join Conversation"
+                  description="Enter a private conversation code"
+                  onClick={openJoinConversation}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side */}
+        <div className="hidden items-center gap-2 md:flex">
           {/* Search */}
+          {searchOpen ? (
+            <div
+              className="
+                flex
+                h-10
+                w-[230px]
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-zinc-200
+                bg-zinc-50
+                px-4
+                transition
+                focus-within:border-zinc-300
+                focus-within:bg-white
+              "
+            >
+              <Search
+                size={15}
+                strokeWidth={1.8}
+                className="shrink-0 text-zinc-400"
+              />
 
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search LinkUp..."
+                className="
+                  min-w-0
+                  flex-1
+                  bg-transparent
+                  text-sm
+                  font-medium
+                  text-zinc-800
+                  outline-none
+                  placeholder:text-zinc-400
+                "
+                onChange={(event) => {
+                  window.dispatchEvent(
+                    new CustomEvent("linkup:search-query", {
+                      detail: event.target.value,
+                    }),
+                  );
+                }}
+              />
+
+              <button
+                type="button"
+                onClick={closeSearch}
+                aria-label="Close search"
+                className="text-zinc-400 transition hover:text-zinc-800"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSearch}
+              aria-label="Search LinkUp"
+              className="
+                grid
+                h-10
+                w-10
+                place-items-center
+                rounded-full
+                text-zinc-500
+                transition
+                hover:bg-zinc-100
+                hover:text-zinc-900
+              "
+            >
+              <Search size={18} strokeWidth={1.8} />
+            </button>
+          )}
+
+          {/* Profile */}
+          <div ref={profileMenuRef} className="relative">
+            <button
+              type="button"
+              onClick={toggleProfile}
+              aria-haspopup="menu"
+              aria-expanded={profileOpen}
+              className="
+                flex
+                items-center
+                gap-2
+                rounded-full
+                border
+                border-zinc-200
+                bg-white
+                py-1
+                pl-1
+                pr-3
+                transition
+                hover:bg-zinc-50
+              "
+            >
+              <div
+                className="
+                  relative
+                  grid
+                  h-8
+                  w-8
+                  shrink-0
+                  place-items-center
+                  overflow-hidden
+                  rounded-full
+                  bg-violet-600
+                  text-[10px]
+                  font-black
+                  text-white
+                "
+              >
+                {guest?.avatarUrl ? (
+                  <img
+                    src={guest.avatarUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  avatarLetter
+                )}
+
+                <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border-[1.5px] border-white bg-emerald-400" />
+              </div>
+
+              <span className="hidden max-w-[90px] truncate text-xs font-medium text-zinc-700 lg:block">
+                {username}
+              </span>
+
+              <ChevronDown
+                size={13}
+                className={`text-zinc-400 transition ${
+                  profileOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {profileOpen && (
+              <div
+                role="menu"
+                className="
+                  absolute
+                  right-0
+                  top-[calc(100%+12px)]
+                  z-50
+                  w-64
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-zinc-200
+                  bg-white
+                  p-2
+                  shadow-[0_20px_60px_rgba(15,23,42,0.12)]
+                "
+              >
+                <div className="flex items-center gap-3 px-3 py-3">
+                  <div
+                    className="
+                      relative
+                      grid
+                      h-10
+                      w-10
+                      shrink-0
+                      place-items-center
+                      overflow-hidden
+                      rounded-full
+                      bg-violet-600
+                      text-xs
+                      font-black
+                      text-white
+                    "
+                  >
+                    {guest?.avatarUrl ? (
+                      <img
+                        src={guest.avatarUrl}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      avatarLetter
+                    )}
+
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-zinc-900">
+                      {username}
+                    </p>
+
+                    <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-emerald-500">
+                      Online
+                    </p>
+                  </div>
+                </div>
+
+                <div className="border-t border-zinc-100 pt-1">
+                  <Link
+                    to="/profile"
+                    onClick={closeAllMenus}
+                    className="
+                      flex
+                      items-center
+                      gap-3
+                      rounded-xl
+                      px-3
+                      py-2.5
+                      transition
+                      hover:bg-zinc-50
+                    "
+                  >
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-zinc-100 text-zinc-500">
+                      <UserRound size={15} />
+                    </span>
+
+                    <span className="flex-1">
+                      <span className="block text-xs font-semibold text-zinc-900">
+                        Your Profile
+                      </span>
+
+                      <span className="mt-0.5 block text-[10px] text-zinc-400">
+                        View your LinkUp profile
+                      </span>
+                    </span>
+
+                    <ArrowRight
+                      size={13}
+                      className="text-zinc-300"
+                    />
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Controls */}
+        <div className="flex items-center gap-2 md:hidden">
           <button
             type="button"
             onClick={handleSearch}
             aria-label="Search LinkUp"
-            className={`
-              hidden
-              h-9
-              items-center
-              gap-2
-              rounded-xl
-              border
-              px-3.5
-              text-slate-400
-              transition
-              sm:flex
-              lg:w-[230px]
-              ${
-                searchOpen
-                  ? "border-violet-300 bg-white ring-4 ring-violet-500/[0.06]"
-                  : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white hover:text-slate-700"
-              }
-            `}
-          >
-            <Search size={15} strokeWidth={1.8} />
-
-            <span className="flex-1 text-left text-[11px] font-semibold">
-              Search LinkUp
-            </span>
-
-            <kbd
-              className="
-                rounded-md
-                border
-                border-slate-200
-                bg-white
-                px-1.5
-                py-0.5
-                text-[8px]
-                font-bold
-                text-slate-400
-              "
-            >
-              /
-            </kbd>
-          </button>
-
-          {/* Notifications */}
-
-          <Link
-            to="/activity"
-            aria-label="Activity"
-            className={`
-              relative
+            className="
               grid
               h-9
               w-9
               place-items-center
-              rounded-xl
+              rounded-full
+              text-zinc-500
               transition
-              ${
-                isActive("/activity")
-                  ? "bg-slate-100 text-slate-950"
-                  : "text-slate-400 hover:bg-slate-100 hover:text-slate-900"
-              }
-            `}
+              hover:bg-zinc-100
+              hover:text-zinc-900
+            "
           >
-            <Bell size={17} strokeWidth={1.8} />
-
-            {unreadCount > 0 && (
-              <span
-                className="
-                  absolute
-                  right-1.5
-                  top-1.5
-                  h-2
-                  w-2
-                  rounded-full
-                  border-2
-                  border-white
-                  bg-violet-600
-                "
-              />
-            )}
-          </Link>
-
-          {/* Create */}
+            <Search size={18} strokeWidth={1.8} />
+          </button>
 
           <button
             type="button"
-            onClick={handleCreate}
+            onClick={() => {
+              setMenuOpen((current) => !current);
+              setCreateOpen(false);
+              setProfileOpen(false);
+            }}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
             className="
-              ml-1
-              hidden
-              items-center
-              gap-2
-              rounded-xl
-              bg-slate-950
-              py-1.5
-              pl-4
-              pr-1.5
-              text-[12px]
-              font-black
-              text-white
-              shadow-sm
-              transition
-              hover:-translate-y-0.5
-              hover:bg-slate-800
-              sm:flex
-            "
-          >
-            Create
-            <span
-              className="
-                grid
-                h-7
-                w-7
-                place-items-center
-                rounded-[9px]
-                bg-white/10
-              "
-            >
-              <Plus size={14} strokeWidth={2.4} />
-            </span>
-          </button>
-
-          {/* Profile */}
-
-          <Link
-            to="/profile"
-            aria-label={`Open ${username} profile`}
-            className={`
-              ml-1
               flex
-              h-9
-              items-center
+              flex-col
               gap-1.5
-              rounded-xl
-              pl-1
-              pr-2
-              transition
-              ${profileActive ? "bg-slate-100" : "hover:bg-slate-100"}
-            `}
-          >
-            <div
-              className="
-    relative
-    grid
-    h-7
-    w-7
-    place-items-center
-    overflow-hidden
-    rounded-[9px]
-    bg-gradient-to-br
-    from-violet-500
-    to-indigo-600
-    text-[10px]
-    font-black
-    text-white
-  "
-            >
-              {guest?.avatarUrl ? (
-                <img
-                  src={guest.avatarUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                avatarLetter
-              )}
-
-              <span
-                className="
-      absolute
-      bottom-0
-      right-0
-      h-2
-      w-2
-      rounded-full
-      border-[1.5px]
-      border-white
-      bg-emerald-400
-    "
-              />
-            </div>
-
-            <ChevronDown
-              size={13}
-              strokeWidth={1.8}
-              className="hidden text-slate-400 lg:block"
-            />
-          </Link>
-        </div>
-      </div>
-
-      {/* =====================================================
-          MOBILE NAVIGATION
-      ====================================================== */}
-
-      <div className="border-t border-slate-100 md:hidden">
-        <nav className="mx-auto flex h-[50px] items-center justify-around px-2">
-          {navigation.map((item) => {
-            const active = isActive(item.path);
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`
-                  relative
-                  flex
-                  min-w-[60px]
-                  items-center
-                  justify-center
-                  gap-1.5
-                  py-2
-                  text-[10px]
-                  font-bold
-                  transition
-                  ${
-                    active
-                      ? "text-slate-950"
-                      : "text-slate-400 hover:text-slate-700"
-                  }
-                `}
-              >
-                <Icon size={17} strokeWidth={active ? 2.1 : 1.7} />
-
-                <span className="hidden min-[380px]:inline">{item.label}</span>
-
-                {item.label === "Activity" && unreadCount > 0 && (
-                  <span
-                    className="
-                        absolute
-                        right-1
-                        top-1
-                        h-2
-                        w-2
-                        rounded-full
-                        bg-violet-600
-                      "
-                  />
-                )}
-
-                {active && (
-                  <span
-                    className="
-                      absolute
-                      bottom-0
-                      left-1/2
-                      h-[2px]
-                      w-5
-                      -translate-x-1/2
-                      rounded-full
-                      bg-violet-600
-                    "
-                  />
-                )}
-              </Link>
-            );
-          })}
-
-          {/* Mobile Create */}
-
-          <button
-            type="button"
-            onClick={handleCreate}
-            aria-label="Create space"
-            className="
-              grid
-              h-8
-              w-8
-              place-items-center
-              rounded-xl
-              bg-slate-950
-              text-white
-              shadow-sm
-              transition
-              hover:-translate-y-0.5
-              hover:bg-slate-800
+              rounded-full
+              bg-transparent
+              p-2
             "
           >
-            <Plus size={16} strokeWidth={2.4} />
+            <span
+              className={`
+                block
+                h-0.5
+                w-5
+                bg-zinc-800
+                transition-transform
+                ${
+                  menuOpen
+                    ? "translate-y-2 rotate-45"
+                    : ""
+                }
+              `}
+            />
+
+            <span
+              className={`
+                block
+                h-0.5
+                w-5
+                bg-zinc-800
+                transition-opacity
+                ${menuOpen ? "opacity-0" : ""}
+              `}
+            />
+
+            <span
+              className={`
+                block
+                h-0.5
+                w-5
+                bg-zinc-800
+                transition-transform
+                ${
+                  menuOpen
+                    ? "-translate-y-2 -rotate-45"
+                    : ""
+                }
+              `}
+            />
           </button>
-        </nav>
-      </div>
-    </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div
+            className="
+              absolute
+              left-0
+              top-full
+              w-full
+              border-t
+              border-zinc-200
+              bg-white
+              px-5
+              pb-5
+              pt-3
+              shadow-[0_20px_40px_rgba(15,23,42,0.08)]
+              md:hidden
+            "
+          >
+            <div className="flex flex-col gap-1">
+              {navigation.map((item) => {
+                const active = isActive(item.path);
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={closeAllMenus}
+                    className={`
+                      rounded-xl
+                      px-4
+                      py-3
+                      text-sm
+                      transition
+                      ${
+                        active
+                          ? "bg-zinc-50 font-semibold text-zinc-900"
+                          : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
+                      }
+                    `}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+
+              <button
+                type="button"
+                onClick={openCreateSpace}
+                className="
+                  mt-1
+                  flex
+                  items-center
+                  justify-between
+                  rounded-xl
+                  px-4
+                  py-3
+                  text-left
+                  text-sm
+                  font-medium
+                  text-zinc-600
+                  transition
+                  hover:bg-zinc-50
+                  hover:text-zinc-900
+                "
+              >
+                Create a Space
+                <Plus size={16} />
+              </button>
+
+              <button
+                type="button"
+                onClick={openCreatePrivateConversation}
+                className="
+                  flex
+                  items-center
+                  justify-between
+                  rounded-xl
+                  px-4
+                  py-3
+                  text-left
+                  text-sm
+                  font-medium
+                  text-zinc-600
+                  transition
+                  hover:bg-zinc-50
+                  hover:text-zinc-900
+                "
+              >
+                Private Conversation
+                <MessageCircle size={16} />
+              </button>
+
+              <button
+                type="button"
+                onClick={openJoinConversation}
+                className="
+                  flex
+                  items-center
+                  justify-between
+                  rounded-xl
+                  px-4
+                  py-3
+                  text-left
+                  text-sm
+                  font-medium
+                  text-zinc-600
+                  transition
+                  hover:bg-zinc-50
+                  hover:text-zinc-900
+                "
+              >
+                Join Conversation
+                <ArrowRight size={16} />
+              </button>
+
+              <Link
+                to="/profile"
+                onClick={closeAllMenus}
+                className="
+                  mt-2
+                  flex
+                  items-center
+                  gap-3
+                  border-t
+                  border-zinc-100
+                  px-4
+                  pt-4
+                "
+              >
+                <div
+                  className="
+                    grid
+                    h-9
+                    w-9
+                    shrink-0
+                    place-items-center
+                    overflow-hidden
+                    rounded-full
+                    bg-violet-600
+                    text-[10px]
+                    font-black
+                    text-white
+                  "
+                >
+                  {guest?.avatarUrl ? (
+                    <img
+                      src={guest.avatarUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    avatarLetter
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-zinc-900">
+                    {username}
+                  </p>
+
+                  <p className="text-[10px] text-zinc-400">
+                    View profile
+                  </p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Mobile search overlay */}
+      {searchOpen && (
+        <div className="border-t border-zinc-100 bg-white px-5 pb-4 md:hidden">
+          <div className="flex h-11 items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4">
+            <Search
+              size={16}
+              className="shrink-0 text-zinc-400"
+            />
+
+            <input
+              ref={searchInputRef}
+              type="text"
+              placeholder="Search LinkUp..."
+              className="
+                min-w-0
+                flex-1
+                bg-transparent
+                text-sm
+                font-medium
+                text-zinc-800
+                outline-none
+                placeholder:text-zinc-400
+              "
+              onChange={(event) => {
+                window.dispatchEvent(
+                  new CustomEvent("linkup:search-query", {
+                    detail: event.target.value,
+                  }),
+                );
+              }}
+            />
+
+            <button
+              type="button"
+              onClick={closeSearch}
+              aria-label="Close search"
+              className="text-zinc-400"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
+
+function CreateMenuItem({
+  icon,
+  iconClass,
+  title,
+  description,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  iconClass: string;
+  title: string;
+  description: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className="
+        group
+        flex
+        w-full
+        items-center
+        gap-3
+        rounded-xl
+        px-3
+        py-2.5
+        text-left
+        transition
+        hover:bg-zinc-50
+      "
+    >
+      <span
+        className={`
+          grid
+          h-9
+          w-9
+          shrink-0
+          place-items-center
+          rounded-xl
+          transition
+          group-hover:scale-105
+          ${iconClass}
+        `}
+      >
+        {icon}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-xs font-semibold text-zinc-900">
+          {title}
+        </span>
+
+        <span className="mt-0.5 block truncate text-[10px] text-zinc-400">
+          {description}
+        </span>
+      </span>
+
+      <ArrowRight
+        size={13}
+        className="
+          shrink-0
+          text-zinc-200
+          transition
+          group-hover:translate-x-0.5
+          group-hover:text-violet-500
+        "
+      />
+    </button>
+  );
+}
+

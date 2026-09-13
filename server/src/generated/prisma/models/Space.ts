@@ -198,8 +198,8 @@ export type SpaceWhereInput = {
   imageUrl?: Prisma.StringNullableFilter<"Space"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Space"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Space"> | Date | string
-  members?: Prisma.SpaceMemberListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
+  members?: Prisma.SpaceMemberListRelationFilter
 }
 
 export type SpaceOrderByWithRelationInput = {
@@ -210,8 +210,8 @@ export type SpaceOrderByWithRelationInput = {
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  members?: Prisma.SpaceMemberOrderByRelationAggregateInput
   conversations?: Prisma.ConversationOrderByRelationAggregateInput
+  members?: Prisma.SpaceMemberOrderByRelationAggregateInput
 }
 
 export type SpaceWhereUniqueInput = Prisma.AtLeast<{
@@ -225,8 +225,8 @@ export type SpaceWhereUniqueInput = Prisma.AtLeast<{
   imageUrl?: Prisma.StringNullableFilter<"Space"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Space"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Space"> | Date | string
-  members?: Prisma.SpaceMemberListRelationFilter
   conversations?: Prisma.ConversationListRelationFilter
+  members?: Prisma.SpaceMemberListRelationFilter
 }, "id" | "slug">
 
 export type SpaceOrderByWithAggregationInput = {
@@ -263,8 +263,8 @@ export type SpaceCreateInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  members?: Prisma.SpaceMemberCreateNestedManyWithoutSpaceInput
   conversations?: Prisma.ConversationCreateNestedManyWithoutSpaceInput
+  members?: Prisma.SpaceMemberCreateNestedManyWithoutSpaceInput
 }
 
 export type SpaceUncheckedCreateInput = {
@@ -275,8 +275,8 @@ export type SpaceUncheckedCreateInput = {
   imageUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  members?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutSpaceInput
   conversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutSpaceInput
+  members?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutSpaceInput
 }
 
 export type SpaceUpdateInput = {
@@ -287,8 +287,8 @@ export type SpaceUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  members?: Prisma.SpaceMemberUpdateManyWithoutSpaceNestedInput
   conversations?: Prisma.ConversationUpdateManyWithoutSpaceNestedInput
+  members?: Prisma.SpaceMemberUpdateManyWithoutSpaceNestedInput
 }
 
 export type SpaceUncheckedUpdateInput = {
@@ -299,8 +299,8 @@ export type SpaceUncheckedUpdateInput = {
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  members?: Prisma.SpaceMemberUncheckedUpdateManyWithoutSpaceNestedInput
   conversations?: Prisma.ConversationUncheckedUpdateManyWithoutSpaceNestedInput
+  members?: Prisma.SpaceMemberUncheckedUpdateManyWithoutSpaceNestedInput
 }
 
 export type SpaceCreateManyInput = {
@@ -529,13 +529,13 @@ export type SpaceUncheckedUpdateWithoutConversationsInput = {
  */
 
 export type SpaceCountOutputType = {
-  members: number
   conversations: number
+  members: number
 }
 
 export type SpaceCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  members?: boolean | SpaceCountOutputTypeCountMembersArgs
   conversations?: boolean | SpaceCountOutputTypeCountConversationsArgs
+  members?: boolean | SpaceCountOutputTypeCountMembersArgs
 }
 
 /**
@@ -551,15 +551,15 @@ export type SpaceCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extens
 /**
  * SpaceCountOutputType without action
  */
-export type SpaceCountOutputTypeCountMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.SpaceMemberWhereInput
+export type SpaceCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConversationWhereInput
 }
 
 /**
  * SpaceCountOutputType without action
  */
-export type SpaceCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ConversationWhereInput
+export type SpaceCountOutputTypeCountMembersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SpaceMemberWhereInput
 }
 
 
@@ -571,8 +571,8 @@ export type SpaceSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   imageUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  members?: boolean | Prisma.Space$membersArgs<ExtArgs>
   conversations?: boolean | Prisma.Space$conversationsArgs<ExtArgs>
+  members?: boolean | Prisma.Space$membersArgs<ExtArgs>
   _count?: boolean | Prisma.SpaceCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["space"]>
 
@@ -608,8 +608,8 @@ export type SpaceSelectScalar = {
 
 export type SpaceOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "imageUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["space"]>
 export type SpaceInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  members?: boolean | Prisma.Space$membersArgs<ExtArgs>
   conversations?: boolean | Prisma.Space$conversationsArgs<ExtArgs>
+  members?: boolean | Prisma.Space$membersArgs<ExtArgs>
   _count?: boolean | Prisma.SpaceCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SpaceIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -618,8 +618,8 @@ export type SpaceIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type $SpacePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Space"
   objects: {
-    members: Prisma.$SpaceMemberPayload<ExtArgs>[]
     conversations: Prisma.$ConversationPayload<ExtArgs>[]
+    members: Prisma.$SpaceMemberPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1023,8 +1023,8 @@ readonly fields: SpaceFieldRefs;
  */
 export interface Prisma__SpaceClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  members<T extends Prisma.Space$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Space$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpaceMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.Space$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Space$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  members<T extends Prisma.Space$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Space$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpaceMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1454,30 +1454,6 @@ export type SpaceDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
 }
 
 /**
- * Space.members
- */
-export type Space$membersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SpaceMember
-   */
-  select?: Prisma.SpaceMemberSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the SpaceMember
-   */
-  omit?: Prisma.SpaceMemberOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SpaceMemberInclude<ExtArgs> | null
-  where?: Prisma.SpaceMemberWhereInput
-  orderBy?: Prisma.SpaceMemberOrderByWithRelationInput | Prisma.SpaceMemberOrderByWithRelationInput[]
-  cursor?: Prisma.SpaceMemberWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.SpaceMemberScalarFieldEnum | Prisma.SpaceMemberScalarFieldEnum[]
-}
-
-/**
  * Space.conversations
  */
 export type Space$conversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1499,6 +1475,30 @@ export type Space$conversationsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.ConversationScalarFieldEnum | Prisma.ConversationScalarFieldEnum[]
+}
+
+/**
+ * Space.members
+ */
+export type Space$membersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SpaceMember
+   */
+  select?: Prisma.SpaceMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SpaceMember
+   */
+  omit?: Prisma.SpaceMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SpaceMemberInclude<ExtArgs> | null
+  where?: Prisma.SpaceMemberWhereInput
+  orderBy?: Prisma.SpaceMemberOrderByWithRelationInput | Prisma.SpaceMemberOrderByWithRelationInput[]
+  cursor?: Prisma.SpaceMemberWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SpaceMemberScalarFieldEnum | Prisma.SpaceMemberScalarFieldEnum[]
 }
 
 /**

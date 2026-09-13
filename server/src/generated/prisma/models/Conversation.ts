@@ -27,31 +27,34 @@ export type AggregateConversation = {
 export type ConversationMinAggregateOutputType = {
   id: string | null
   title: string | null
-  isPrivate: boolean | null
-  joinCode: string | null
   createdAt: Date | null
   updatedAt: Date | null
   spaceId: string | null
+  isPrivate: boolean | null
+  joinCode: string | null
+  ownerId: string | null
 }
 
 export type ConversationMaxAggregateOutputType = {
   id: string | null
   title: string | null
-  isPrivate: boolean | null
-  joinCode: string | null
   createdAt: Date | null
   updatedAt: Date | null
   spaceId: string | null
+  isPrivate: boolean | null
+  joinCode: string | null
+  ownerId: string | null
 }
 
 export type ConversationCountAggregateOutputType = {
   id: number
   title: number
-  isPrivate: number
-  joinCode: number
   createdAt: number
   updatedAt: number
   spaceId: number
+  isPrivate: number
+  joinCode: number
+  ownerId: number
   _all: number
 }
 
@@ -59,31 +62,34 @@ export type ConversationCountAggregateOutputType = {
 export type ConversationMinAggregateInputType = {
   id?: true
   title?: true
-  isPrivate?: true
-  joinCode?: true
   createdAt?: true
   updatedAt?: true
   spaceId?: true
+  isPrivate?: true
+  joinCode?: true
+  ownerId?: true
 }
 
 export type ConversationMaxAggregateInputType = {
   id?: true
   title?: true
-  isPrivate?: true
-  joinCode?: true
   createdAt?: true
   updatedAt?: true
   spaceId?: true
+  isPrivate?: true
+  joinCode?: true
+  ownerId?: true
 }
 
 export type ConversationCountAggregateInputType = {
   id?: true
   title?: true
-  isPrivate?: true
-  joinCode?: true
   createdAt?: true
   updatedAt?: true
   spaceId?: true
+  isPrivate?: true
+  joinCode?: true
+  ownerId?: true
   _all?: true
 }
 
@@ -162,11 +168,12 @@ export type ConversationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type ConversationGroupByOutputType = {
   id: string
   title: string | null
-  isPrivate: boolean
-  joinCode: string | null
   createdAt: Date
   updatedAt: Date
   spaceId: string | null
+  isPrivate: boolean
+  joinCode: string | null
+  ownerId: string
   _count: ConversationCountAggregateOutputType | null
   _min: ConversationMinAggregateOutputType | null
   _max: ConversationMaxAggregateOutputType | null
@@ -193,11 +200,13 @@ export type ConversationWhereInput = {
   NOT?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
   id?: Prisma.StringFilter<"Conversation"> | string
   title?: Prisma.StringNullableFilter<"Conversation"> | string | null
-  isPrivate?: Prisma.BoolFilter<"Conversation"> | boolean
-  joinCode?: Prisma.StringNullableFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   spaceId?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  isPrivate?: Prisma.BoolFilter<"Conversation"> | boolean
+  joinCode?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  ownerId?: Prisma.StringFilter<"Conversation"> | string
+  owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   space?: Prisma.XOR<Prisma.SpaceNullableScalarRelationFilter, Prisma.SpaceWhereInput> | null
   participants?: Prisma.ConversationParticipantListRelationFilter
   messages?: Prisma.MessageListRelationFilter
@@ -206,11 +215,13 @@ export type ConversationWhereInput = {
 export type ConversationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  joinCode?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   spaceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  joinCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
+  owner?: Prisma.UserOrderByWithRelationInput
   space?: Prisma.SpaceOrderByWithRelationInput
   participants?: Prisma.ConversationParticipantOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
@@ -223,10 +234,12 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ConversationWhereInput[]
   NOT?: Prisma.ConversationWhereInput | Prisma.ConversationWhereInput[]
   title?: Prisma.StringNullableFilter<"Conversation"> | string | null
-  isPrivate?: Prisma.BoolFilter<"Conversation"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
   spaceId?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  isPrivate?: Prisma.BoolFilter<"Conversation"> | boolean
+  ownerId?: Prisma.StringFilter<"Conversation"> | string
+  owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   space?: Prisma.XOR<Prisma.SpaceNullableScalarRelationFilter, Prisma.SpaceWhereInput> | null
   participants?: Prisma.ConversationParticipantListRelationFilter
   messages?: Prisma.MessageListRelationFilter
@@ -235,11 +248,12 @@ export type ConversationWhereUniqueInput = Prisma.AtLeast<{
 export type ConversationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrderInput | Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  joinCode?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   spaceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  joinCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
   _count?: Prisma.ConversationCountOrderByAggregateInput
   _max?: Prisma.ConversationMaxOrderByAggregateInput
   _min?: Prisma.ConversationMinOrderByAggregateInput
@@ -251,20 +265,22 @@ export type ConversationScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ConversationScalarWhereWithAggregatesInput | Prisma.ConversationScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Conversation"> | string
   title?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
-  isPrivate?: Prisma.BoolWithAggregatesFilter<"Conversation"> | boolean
-  joinCode?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Conversation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Conversation"> | Date | string
   spaceId?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
+  isPrivate?: Prisma.BoolWithAggregatesFilter<"Conversation"> | boolean
+  joinCode?: Prisma.StringNullableWithAggregatesFilter<"Conversation"> | string | null
+  ownerId?: Prisma.StringWithAggregatesFilter<"Conversation"> | string
 }
 
 export type ConversationCreateInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isPrivate?: boolean
+  joinCode?: string | null
+  owner: Prisma.UserCreateNestedOneWithoutOwnedConversationsInput
   space?: Prisma.SpaceCreateNestedOneWithoutConversationsInput
   participants?: Prisma.ConversationParticipantCreateNestedManyWithoutConversationInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
@@ -273,11 +289,12 @@ export type ConversationCreateInput = {
 export type ConversationUncheckedCreateInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   spaceId?: string | null
+  isPrivate?: boolean
+  joinCode?: string | null
+  ownerId: string
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
 }
@@ -285,10 +302,11 @@ export type ConversationUncheckedCreateInput = {
 export type ConversationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedConversationsNestedInput
   space?: Prisma.SpaceUpdateOneWithoutConversationsNestedInput
   participants?: Prisma.ConversationParticipantUpdateManyWithoutConversationNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
@@ -297,11 +315,12 @@ export type ConversationUpdateInput = {
 export type ConversationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
 }
@@ -309,30 +328,32 @@ export type ConversationUncheckedUpdateInput = {
 export type ConversationCreateManyInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   spaceId?: string | null
+  isPrivate?: boolean
+  joinCode?: string | null
+  ownerId: string
 }
 
 export type ConversationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ConversationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ConversationListRelationFilter = {
@@ -348,36 +369,81 @@ export type ConversationOrderByRelationAggregateInput = {
 export type ConversationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  joinCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   spaceId?: Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  joinCode?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
 }
 
 export type ConversationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  joinCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   spaceId?: Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  joinCode?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
 }
 
 export type ConversationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  joinCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   spaceId?: Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  joinCode?: Prisma.SortOrder
+  ownerId?: Prisma.SortOrder
 }
 
 export type ConversationScalarRelationFilter = {
   is?: Prisma.ConversationWhereInput
   isNot?: Prisma.ConversationWhereInput
+}
+
+export type ConversationCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutOwnerInput, Prisma.ConversationUncheckedCreateWithoutOwnerInput> | Prisma.ConversationCreateWithoutOwnerInput[] | Prisma.ConversationUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutOwnerInput | Prisma.ConversationCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.ConversationCreateManyOwnerInputEnvelope
+  connect?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+}
+
+export type ConversationUncheckedCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutOwnerInput, Prisma.ConversationUncheckedCreateWithoutOwnerInput> | Prisma.ConversationCreateWithoutOwnerInput[] | Prisma.ConversationUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutOwnerInput | Prisma.ConversationCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.ConversationCreateManyOwnerInputEnvelope
+  connect?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+}
+
+export type ConversationUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutOwnerInput, Prisma.ConversationUncheckedCreateWithoutOwnerInput> | Prisma.ConversationCreateWithoutOwnerInput[] | Prisma.ConversationUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutOwnerInput | Prisma.ConversationCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.ConversationUpsertWithWhereUniqueWithoutOwnerInput | Prisma.ConversationUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.ConversationCreateManyOwnerInputEnvelope
+  set?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+  disconnect?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+  delete?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+  connect?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+  update?: Prisma.ConversationUpdateWithWhereUniqueWithoutOwnerInput | Prisma.ConversationUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.ConversationUpdateManyWithWhereWithoutOwnerInput | Prisma.ConversationUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
+}
+
+export type ConversationUncheckedUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.ConversationCreateWithoutOwnerInput, Prisma.ConversationUncheckedCreateWithoutOwnerInput> | Prisma.ConversationCreateWithoutOwnerInput[] | Prisma.ConversationUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.ConversationCreateOrConnectWithoutOwnerInput | Prisma.ConversationCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.ConversationUpsertWithWhereUniqueWithoutOwnerInput | Prisma.ConversationUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.ConversationCreateManyOwnerInputEnvelope
+  set?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+  disconnect?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+  delete?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+  connect?: Prisma.ConversationWhereUniqueInput | Prisma.ConversationWhereUniqueInput[]
+  update?: Prisma.ConversationUpdateWithWhereUniqueWithoutOwnerInput | Prisma.ConversationUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.ConversationUpdateManyWithWhereWithoutOwnerInput | Prisma.ConversationUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
 }
 
 export type ConversationCreateNestedManyWithoutSpaceInput = {
@@ -454,13 +520,78 @@ export type ConversationUpdateOneRequiredWithoutMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConversationUpdateToOneWithWhereWithoutMessagesInput, Prisma.ConversationUpdateWithoutMessagesInput>, Prisma.ConversationUncheckedUpdateWithoutMessagesInput>
 }
 
+export type ConversationCreateWithoutOwnerInput = {
+  id?: string
+  title?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  isPrivate?: boolean
+  joinCode?: string | null
+  space?: Prisma.SpaceCreateNestedOneWithoutConversationsInput
+  participants?: Prisma.ConversationParticipantCreateNestedManyWithoutConversationInput
+  messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
+}
+
+export type ConversationUncheckedCreateWithoutOwnerInput = {
+  id?: string
+  title?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  spaceId?: string | null
+  isPrivate?: boolean
+  joinCode?: string | null
+  participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
+}
+
+export type ConversationCreateOrConnectWithoutOwnerInput = {
+  where: Prisma.ConversationWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutOwnerInput, Prisma.ConversationUncheckedCreateWithoutOwnerInput>
+}
+
+export type ConversationCreateManyOwnerInputEnvelope = {
+  data: Prisma.ConversationCreateManyOwnerInput | Prisma.ConversationCreateManyOwnerInput[]
+  skipDuplicates?: boolean
+}
+
+export type ConversationUpsertWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.ConversationWhereUniqueInput
+  update: Prisma.XOR<Prisma.ConversationUpdateWithoutOwnerInput, Prisma.ConversationUncheckedUpdateWithoutOwnerInput>
+  create: Prisma.XOR<Prisma.ConversationCreateWithoutOwnerInput, Prisma.ConversationUncheckedCreateWithoutOwnerInput>
+}
+
+export type ConversationUpdateWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.ConversationWhereUniqueInput
+  data: Prisma.XOR<Prisma.ConversationUpdateWithoutOwnerInput, Prisma.ConversationUncheckedUpdateWithoutOwnerInput>
+}
+
+export type ConversationUpdateManyWithWhereWithoutOwnerInput = {
+  where: Prisma.ConversationScalarWhereInput
+  data: Prisma.XOR<Prisma.ConversationUpdateManyMutationInput, Prisma.ConversationUncheckedUpdateManyWithoutOwnerInput>
+}
+
+export type ConversationScalarWhereInput = {
+  AND?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
+  OR?: Prisma.ConversationScalarWhereInput[]
+  NOT?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
+  id?: Prisma.StringFilter<"Conversation"> | string
+  title?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
+  spaceId?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  isPrivate?: Prisma.BoolFilter<"Conversation"> | boolean
+  joinCode?: Prisma.StringNullableFilter<"Conversation"> | string | null
+  ownerId?: Prisma.StringFilter<"Conversation"> | string
+}
+
 export type ConversationCreateWithoutSpaceInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isPrivate?: boolean
+  joinCode?: string | null
+  owner: Prisma.UserCreateNestedOneWithoutOwnedConversationsInput
   participants?: Prisma.ConversationParticipantCreateNestedManyWithoutConversationInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
 }
@@ -468,10 +599,11 @@ export type ConversationCreateWithoutSpaceInput = {
 export type ConversationUncheckedCreateWithoutSpaceInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isPrivate?: boolean
+  joinCode?: string | null
+  ownerId: string
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
 }
@@ -502,26 +634,14 @@ export type ConversationUpdateManyWithWhereWithoutSpaceInput = {
   data: Prisma.XOR<Prisma.ConversationUpdateManyMutationInput, Prisma.ConversationUncheckedUpdateManyWithoutSpaceInput>
 }
 
-export type ConversationScalarWhereInput = {
-  AND?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
-  OR?: Prisma.ConversationScalarWhereInput[]
-  NOT?: Prisma.ConversationScalarWhereInput | Prisma.ConversationScalarWhereInput[]
-  id?: Prisma.StringFilter<"Conversation"> | string
-  title?: Prisma.StringNullableFilter<"Conversation"> | string | null
-  isPrivate?: Prisma.BoolFilter<"Conversation"> | boolean
-  joinCode?: Prisma.StringNullableFilter<"Conversation"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Conversation"> | Date | string
-  spaceId?: Prisma.StringNullableFilter<"Conversation"> | string | null
-}
-
 export type ConversationCreateWithoutParticipantsInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isPrivate?: boolean
+  joinCode?: string | null
+  owner: Prisma.UserCreateNestedOneWithoutOwnedConversationsInput
   space?: Prisma.SpaceCreateNestedOneWithoutConversationsInput
   messages?: Prisma.MessageCreateNestedManyWithoutConversationInput
 }
@@ -529,11 +649,12 @@ export type ConversationCreateWithoutParticipantsInput = {
 export type ConversationUncheckedCreateWithoutParticipantsInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   spaceId?: string | null
+  isPrivate?: boolean
+  joinCode?: string | null
+  ownerId: string
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutConversationInput
 }
 
@@ -556,10 +677,11 @@ export type ConversationUpdateToOneWithWhereWithoutParticipantsInput = {
 export type ConversationUpdateWithoutParticipantsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedConversationsNestedInput
   space?: Prisma.SpaceUpdateOneWithoutConversationsNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
 }
@@ -567,21 +689,23 @@ export type ConversationUpdateWithoutParticipantsInput = {
 export type ConversationUncheckedUpdateWithoutParticipantsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
 }
 
 export type ConversationCreateWithoutMessagesInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isPrivate?: boolean
+  joinCode?: string | null
+  owner: Prisma.UserCreateNestedOneWithoutOwnedConversationsInput
   space?: Prisma.SpaceCreateNestedOneWithoutConversationsInput
   participants?: Prisma.ConversationParticipantCreateNestedManyWithoutConversationInput
 }
@@ -589,11 +713,12 @@ export type ConversationCreateWithoutMessagesInput = {
 export type ConversationUncheckedCreateWithoutMessagesInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   spaceId?: string | null
+  isPrivate?: boolean
+  joinCode?: string | null
+  ownerId: string
   participants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutConversationInput
 }
 
@@ -616,10 +741,11 @@ export type ConversationUpdateToOneWithWhereWithoutMessagesInput = {
 export type ConversationUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedConversationsNestedInput
   space?: Prisma.SpaceUpdateOneWithoutConversationsNestedInput
   participants?: Prisma.ConversationParticipantUpdateManyWithoutConversationNestedInput
 }
@@ -627,30 +753,77 @@ export type ConversationUpdateWithoutMessagesInput = {
 export type ConversationUncheckedUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
+}
+
+export type ConversationCreateManyOwnerInput = {
+  id?: string
+  title?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  spaceId?: string | null
+  isPrivate?: boolean
+  joinCode?: string | null
+}
+
+export type ConversationUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  space?: Prisma.SpaceUpdateOneWithoutConversationsNestedInput
+  participants?: Prisma.ConversationParticipantUpdateManyWithoutConversationNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
+}
+
+export type ConversationUncheckedUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
+}
+
+export type ConversationUncheckedUpdateManyWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spaceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ConversationCreateManySpaceInput = {
   id?: string
   title?: string | null
-  isPrivate?: boolean
-  joinCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  isPrivate?: boolean
+  joinCode?: string | null
+  ownerId: string
 }
 
 export type ConversationUpdateWithoutSpaceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedConversationsNestedInput
   participants?: Prisma.ConversationParticipantUpdateManyWithoutConversationNestedInput
   messages?: Prisma.MessageUpdateManyWithoutConversationNestedInput
 }
@@ -658,10 +831,11 @@ export type ConversationUpdateWithoutSpaceInput = {
 export type ConversationUncheckedUpdateWithoutSpaceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   participants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutConversationNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutConversationNestedInput
 }
@@ -669,10 +843,11 @@ export type ConversationUncheckedUpdateWithoutSpaceInput = {
 export type ConversationUncheckedUpdateManyWithoutSpaceInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -718,11 +893,13 @@ export type ConversationCountOutputTypeCountMessagesArgs<ExtArgs extends runtime
 export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
-  isPrivate?: boolean
-  joinCode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spaceId?: boolean
+  isPrivate?: boolean
+  joinCode?: boolean
+  ownerId?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.Conversation$spaceArgs<ExtArgs>
   participants?: boolean | Prisma.Conversation$participantsArgs<ExtArgs>
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
@@ -732,52 +909,61 @@ export type ConversationSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type ConversationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
-  isPrivate?: boolean
-  joinCode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spaceId?: boolean
+  isPrivate?: boolean
+  joinCode?: boolean
+  ownerId?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.Conversation$spaceArgs<ExtArgs>
 }, ExtArgs["result"]["conversation"]>
 
 export type ConversationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
-  isPrivate?: boolean
-  joinCode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spaceId?: boolean
+  isPrivate?: boolean
+  joinCode?: boolean
+  ownerId?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.Conversation$spaceArgs<ExtArgs>
 }, ExtArgs["result"]["conversation"]>
 
 export type ConversationSelectScalar = {
   id?: boolean
   title?: boolean
-  isPrivate?: boolean
-  joinCode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spaceId?: boolean
+  isPrivate?: boolean
+  joinCode?: boolean
+  ownerId?: boolean
 }
 
-export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "isPrivate" | "joinCode" | "createdAt" | "updatedAt" | "spaceId", ExtArgs["result"]["conversation"]>
+export type ConversationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "createdAt" | "updatedAt" | "spaceId" | "isPrivate" | "joinCode" | "ownerId", ExtArgs["result"]["conversation"]>
 export type ConversationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.Conversation$spaceArgs<ExtArgs>
   participants?: boolean | Prisma.Conversation$participantsArgs<ExtArgs>
   messages?: boolean | Prisma.Conversation$messagesArgs<ExtArgs>
   _count?: boolean | Prisma.ConversationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ConversationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.Conversation$spaceArgs<ExtArgs>
 }
 export type ConversationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.Conversation$spaceArgs<ExtArgs>
 }
 
 export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Conversation"
   objects: {
+    owner: Prisma.$UserPayload<ExtArgs>
     space: Prisma.$SpacePayload<ExtArgs> | null
     participants: Prisma.$ConversationParticipantPayload<ExtArgs>[]
     messages: Prisma.$MessagePayload<ExtArgs>[]
@@ -785,11 +971,12 @@ export type $ConversationPayload<ExtArgs extends runtime.Types.Extensions.Intern
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     title: string | null
-    isPrivate: boolean
-    joinCode: string | null
     createdAt: Date
     updatedAt: Date
     spaceId: string | null
+    isPrivate: boolean
+    joinCode: string | null
+    ownerId: string
   }, ExtArgs["result"]["conversation"]>
   composites: {}
 }
@@ -1184,6 +1371,7 @@ readonly fields: ConversationFieldRefs;
  */
 export interface Prisma__ConversationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  owner<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   space<T extends Prisma.Conversation$spaceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$spaceArgs<ExtArgs>>): Prisma.Prisma__SpaceClient<runtime.Types.Result.GetResult<Prisma.$SpacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   participants<T extends Prisma.Conversation$participantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   messages<T extends Prisma.Conversation$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Conversation$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1218,11 +1406,12 @@ export interface Prisma__ConversationClient<T, Null = never, ExtArgs extends run
 export interface ConversationFieldRefs {
   readonly id: Prisma.FieldRef<"Conversation", 'String'>
   readonly title: Prisma.FieldRef<"Conversation", 'String'>
-  readonly isPrivate: Prisma.FieldRef<"Conversation", 'Boolean'>
-  readonly joinCode: Prisma.FieldRef<"Conversation", 'String'>
   readonly createdAt: Prisma.FieldRef<"Conversation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Conversation", 'DateTime'>
   readonly spaceId: Prisma.FieldRef<"Conversation", 'String'>
+  readonly isPrivate: Prisma.FieldRef<"Conversation", 'Boolean'>
+  readonly joinCode: Prisma.FieldRef<"Conversation", 'String'>
+  readonly ownerId: Prisma.FieldRef<"Conversation", 'String'>
 }
     
 

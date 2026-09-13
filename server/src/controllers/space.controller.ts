@@ -7,6 +7,7 @@ import {
   getSpaceById,
   joinSpace,
   leaveSpace,
+  deleteSpace,
 } from "../services/space.service.js";
 
 function getGuestId(req: Request): string | null {
@@ -130,7 +131,7 @@ export async function discover(req: Request, res: Response) {
       message: "Failed to fetch discoverable spaces",
     });
   }
-};
+}
 
 export async function getById(req: Request, res: Response) {
   try {
@@ -274,6 +275,61 @@ export async function leave(req: Request, res: Response) {
 
     return res.status(500).json({
       message: "Failed to leave space",
+    });
+  }
+}
+
+export async function remove(req: Request, res: Response) {
+  try {
+    const guestId = getGuestId(req);
+    const { spaceId } = req.params;
+
+    if (!guestId) {
+      return res.status(401).json({
+        message: "Guest session not found",
+      });
+    }
+
+    if (typeof spaceId !== "string" || !spaceId.trim()) {
+      return res.status(400).json({
+        message: "Space ID is required",
+      });
+    }
+
+    const result = await deleteSpace(guestId, spaceId.trim());
+
+    if (result.error === "GUEST_NOT_FOUND") {
+      return res.status(404).json({
+        message: "Guest not found",
+      });
+    }
+
+    if (result.error === "SPACE_NOT_FOUND") {
+      return res.status(404).json({
+        message: "Space not found",
+      });
+    }
+
+    if (result.error === "NOT_MEMBER") {
+      return res.status(403).json({
+        message: "You are not a member of this space",
+      });
+    }
+
+    if (result.error === "ONLY_OWNER_CAN_DELETE") {
+      return res.status(403).json({
+        message: "Only the space owner can delete this space",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Space deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete space error:", error);
+
+    return res.status(500).json({
+      message: "Failed to delete space",
     });
   }
 }

@@ -26,70 +26,70 @@ export type AggregateUser = {
 
 export type UserMinAggregateOutputType = {
   id: string | null
-  guestId: string | null
   username: string | null
-  usernameNormalized: string | null
   bio: string | null
   avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  guestId: string | null
+  usernameNormalized: string | null
 }
 
 export type UserMaxAggregateOutputType = {
   id: string | null
-  guestId: string | null
   username: string | null
-  usernameNormalized: string | null
   bio: string | null
   avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  guestId: string | null
+  usernameNormalized: string | null
 }
 
 export type UserCountAggregateOutputType = {
   id: number
-  guestId: number
   username: number
-  usernameNormalized: number
   bio: number
   avatarUrl: number
   createdAt: number
   updatedAt: number
+  guestId: number
+  usernameNormalized: number
   _all: number
 }
 
 
 export type UserMinAggregateInputType = {
   id?: true
-  guestId?: true
   username?: true
-  usernameNormalized?: true
   bio?: true
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  guestId?: true
+  usernameNormalized?: true
 }
 
 export type UserMaxAggregateInputType = {
   id?: true
-  guestId?: true
   username?: true
-  usernameNormalized?: true
   bio?: true
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  guestId?: true
+  usernameNormalized?: true
 }
 
 export type UserCountAggregateInputType = {
   id?: true
-  guestId?: true
   username?: true
-  usernameNormalized?: true
   bio?: true
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  guestId?: true
+  usernameNormalized?: true
   _all?: true
 }
 
@@ -167,13 +167,13 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 
 export type UserGroupByOutputType = {
   id: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio: string | null
   avatarUrl: string | null
   createdAt: Date
   updatedAt: Date
+  guestId: string
+  usernameNormalized: string
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -199,32 +199,34 @@ export type UserWhereInput = {
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.StringFilter<"User"> | string
-  guestId?: Prisma.StringFilter<"User"> | string
   username?: Prisma.StringFilter<"User"> | string
-  usernameNormalized?: Prisma.StringFilter<"User"> | string
   bio?: Prisma.StringNullableFilter<"User"> | string | null
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  spaceMemberships?: Prisma.SpaceMemberListRelationFilter
+  guestId?: Prisma.StringFilter<"User"> | string
+  usernameNormalized?: Prisma.StringFilter<"User"> | string
   conversations?: Prisma.ConversationParticipantListRelationFilter
+  ownedConversations?: Prisma.ConversationListRelationFilter
   messages?: Prisma.MessageListRelationFilter
   reactions?: Prisma.MessageReactionListRelationFilter
+  spaceMemberships?: Prisma.SpaceMemberListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  guestId?: Prisma.SortOrder
   username?: Prisma.SortOrder
-  usernameNormalized?: Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  spaceMemberships?: Prisma.SpaceMemberOrderByRelationAggregateInput
+  guestId?: Prisma.SortOrder
+  usernameNormalized?: Prisma.SortOrder
   conversations?: Prisma.ConversationParticipantOrderByRelationAggregateInput
+  ownedConversations?: Prisma.ConversationOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
   reactions?: Prisma.MessageReactionOrderByRelationAggregateInput
+  spaceMemberships?: Prisma.SpaceMemberOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -239,21 +241,22 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
-  spaceMemberships?: Prisma.SpaceMemberListRelationFilter
   conversations?: Prisma.ConversationParticipantListRelationFilter
+  ownedConversations?: Prisma.ConversationListRelationFilter
   messages?: Prisma.MessageListRelationFilter
   reactions?: Prisma.MessageReactionListRelationFilter
+  spaceMemberships?: Prisma.SpaceMemberListRelationFilter
 }, "id" | "guestId" | "usernameNormalized">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  guestId?: Prisma.SortOrder
   username?: Prisma.SortOrder
-  usernameNormalized?: Prisma.SortOrder
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  guestId?: Prisma.SortOrder
+  usernameNormalized?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -264,139 +267,143 @@ export type UserScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"User"> | string
-  guestId?: Prisma.StringWithAggregatesFilter<"User"> | string
   username?: Prisma.StringWithAggregatesFilter<"User"> | string
-  usernameNormalized?: Prisma.StringWithAggregatesFilter<"User"> | string
   bio?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  guestId?: Prisma.StringWithAggregatesFilter<"User"> | string
+  usernameNormalized?: Prisma.StringWithAggregatesFilter<"User"> | string
 }
 
 export type UserCreateInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
+  guestId: string
+  usernameNormalized: string
   conversations?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  ownedConversations?: Prisma.ConversationCreateNestedManyWithoutOwnerInput
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   reactions?: Prisma.MessageReactionCreateNestedManyWithoutUserInput
+  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
+  guestId: string
+  usernameNormalized: string
   conversations?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  ownedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOwnerInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutUserInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   conversations?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  ownedConversations?: Prisma.ConversationUpdateManyWithoutOwnerNestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   reactions?: Prisma.MessageReactionUpdateManyWithoutUserNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   conversations?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  ownedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutOwnerNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutUserNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  guestId: string
+  usernameNormalized: string
 }
 
 export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  guestId?: Prisma.SortOrder
   username?: Prisma.SortOrder
-  usernameNormalized?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  guestId?: Prisma.SortOrder
+  usernameNormalized?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  guestId?: Prisma.SortOrder
   username?: Prisma.SortOrder
-  usernameNormalized?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  guestId?: Prisma.SortOrder
+  usernameNormalized?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  guestId?: Prisma.SortOrder
   username?: Prisma.SortOrder
-  usernameNormalized?: Prisma.SortOrder
   bio?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  guestId?: Prisma.SortOrder
+  usernameNormalized?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -428,6 +435,20 @@ export type UserUpdateOneRequiredWithoutSpaceMembershipsNestedInput = {
   upsert?: Prisma.UserUpsertWithoutSpaceMembershipsInput
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSpaceMembershipsInput, Prisma.UserUpdateWithoutSpaceMembershipsInput>, Prisma.UserUncheckedUpdateWithoutSpaceMembershipsInput>
+}
+
+export type UserCreateNestedOneWithoutOwnedConversationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOwnedConversationsInput, Prisma.UserUncheckedCreateWithoutOwnedConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnedConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutOwnedConversationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOwnedConversationsInput, Prisma.UserUncheckedCreateWithoutOwnedConversationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnedConversationsInput
+  upsert?: Prisma.UserUpsertWithoutOwnedConversationsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOwnedConversationsInput, Prisma.UserUpdateWithoutOwnedConversationsInput>, Prisma.UserUncheckedUpdateWithoutOwnedConversationsInput>
 }
 
 export type UserCreateNestedOneWithoutConversationsInput = {
@@ -474,28 +495,30 @@ export type UserUpdateOneRequiredWithoutReactionsNestedInput = {
 
 export type UserCreateWithoutSpaceMembershipsInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  guestId: string
+  usernameNormalized: string
   conversations?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  ownedConversations?: Prisma.ConversationCreateNestedManyWithoutOwnerInput
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   reactions?: Prisma.MessageReactionCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSpaceMembershipsInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  guestId: string
+  usernameNormalized: string
   conversations?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  ownedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOwnerInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutUserInput
 }
@@ -518,58 +541,138 @@ export type UserUpdateToOneWithWhereWithoutSpaceMembershipsInput = {
 
 export type UserUpdateWithoutSpaceMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   conversations?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  ownedConversations?: Prisma.ConversationUpdateManyWithoutOwnerNestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   reactions?: Prisma.MessageReactionUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSpaceMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   conversations?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  ownedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutOwnerNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutUserNestedInput
 }
 
-export type UserCreateWithoutConversationsInput = {
+export type UserCreateWithoutOwnedConversationsInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
+  guestId: string
+  usernameNormalized: string
+  conversations?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
   reactions?: Prisma.MessageReactionCreateNestedManyWithoutUserInput
+  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutOwnedConversationsInput = {
+  id?: string
+  username: string
+  bio?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  guestId: string
+  usernameNormalized: string
+  conversations?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutUserInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutOwnedConversationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOwnedConversationsInput, Prisma.UserUncheckedCreateWithoutOwnedConversationsInput>
+}
+
+export type UserUpsertWithoutOwnedConversationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOwnedConversationsInput, Prisma.UserUncheckedUpdateWithoutOwnedConversationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOwnedConversationsInput, Prisma.UserUncheckedCreateWithoutOwnedConversationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOwnedConversationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOwnedConversationsInput, Prisma.UserUncheckedUpdateWithoutOwnedConversationsInput>
+}
+
+export type UserUpdateWithoutOwnedConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  conversations?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  reactions?: Prisma.MessageReactionUpdateManyWithoutUserNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOwnedConversationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  conversations?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutUserNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutConversationsInput = {
+  id?: string
+  username: string
+  bio?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  guestId: string
+  usernameNormalized: string
+  ownedConversations?: Prisma.ConversationCreateNestedManyWithoutOwnerInput
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  reactions?: Prisma.MessageReactionCreateNestedManyWithoutUserInput
+  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutConversationsInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
+  guestId: string
+  usernameNormalized: string
+  ownedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOwnerInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutUserInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutConversationsInput = {
@@ -590,58 +693,62 @@ export type UserUpdateToOneWithWhereWithoutConversationsInput = {
 
 export type UserUpdateWithoutConversationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  ownedConversations?: Prisma.ConversationUpdateManyWithoutOwnerNestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   reactions?: Prisma.MessageReactionUpdateManyWithoutUserNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutConversationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
+  ownedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutOwnerNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutUserNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutMessagesInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
+  guestId: string
+  usernameNormalized: string
   conversations?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  ownedConversations?: Prisma.ConversationCreateNestedManyWithoutOwnerInput
   reactions?: Prisma.MessageReactionCreateNestedManyWithoutUserInput
+  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutMessagesInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
+  guestId: string
+  usernameNormalized: string
   conversations?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  ownedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOwnerInput
   reactions?: Prisma.MessageReactionUncheckedCreateNestedManyWithoutUserInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutMessagesInput = {
@@ -662,58 +769,62 @@ export type UserUpdateToOneWithWhereWithoutMessagesInput = {
 
 export type UserUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   conversations?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  ownedConversations?: Prisma.ConversationUpdateManyWithoutOwnerNestedInput
   reactions?: Prisma.MessageReactionUpdateManyWithoutUserNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   conversations?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  ownedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutOwnerNestedInput
   reactions?: Prisma.MessageReactionUncheckedUpdateManyWithoutUserNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutReactionsInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
+  guestId: string
+  usernameNormalized: string
   conversations?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  ownedConversations?: Prisma.ConversationCreateNestedManyWithoutOwnerInput
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  spaceMemberships?: Prisma.SpaceMemberCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutReactionsInput = {
   id?: string
-  guestId: string
   username: string
-  usernameNormalized: string
   bio?: string | null
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
+  guestId: string
+  usernameNormalized: string
   conversations?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  ownedConversations?: Prisma.ConversationUncheckedCreateNestedManyWithoutOwnerInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutReactionsInput = {
@@ -734,30 +845,32 @@ export type UserUpdateToOneWithWhereWithoutReactionsInput = {
 
 export type UserUpdateWithoutReactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   conversations?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  ownedConversations?: Prisma.ConversationUpdateManyWithoutOwnerNestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReactionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  guestId?: Prisma.StringFieldUpdateOperationsInput | string
   username?: Prisma.StringFieldUpdateOperationsInput | string
-  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
+  guestId?: Prisma.StringFieldUpdateOperationsInput | string
+  usernameNormalized?: Prisma.StringFieldUpdateOperationsInput | string
   conversations?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  ownedConversations?: Prisma.ConversationUncheckedUpdateManyWithoutOwnerNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  spaceMemberships?: Prisma.SpaceMemberUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -766,17 +879,19 @@ export type UserUncheckedUpdateWithoutReactionsInput = {
  */
 
 export type UserCountOutputType = {
-  spaceMemberships: number
   conversations: number
+  ownedConversations: number
   messages: number
   reactions: number
+  spaceMemberships: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  spaceMemberships?: boolean | UserCountOutputTypeCountSpaceMembershipsArgs
   conversations?: boolean | UserCountOutputTypeCountConversationsArgs
+  ownedConversations?: boolean | UserCountOutputTypeCountOwnedConversationsArgs
   messages?: boolean | UserCountOutputTypeCountMessagesArgs
   reactions?: boolean | UserCountOutputTypeCountReactionsArgs
+  spaceMemberships?: boolean | UserCountOutputTypeCountSpaceMembershipsArgs
 }
 
 /**
@@ -792,15 +907,15 @@ export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountSpaceMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.SpaceMemberWhereInput
+export type UserCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConversationParticipantWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ConversationParticipantWhereInput
+export type UserCountOutputTypeCountOwnedConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConversationWhereInput
 }
 
 /**
@@ -817,62 +932,71 @@ export type UserCountOutputTypeCountReactionsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.MessageReactionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSpaceMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SpaceMemberWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  guestId?: boolean
   username?: boolean
-  usernameNormalized?: boolean
   bio?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  spaceMemberships?: boolean | Prisma.User$spaceMembershipsArgs<ExtArgs>
+  guestId?: boolean
+  usernameNormalized?: boolean
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
+  ownedConversations?: boolean | Prisma.User$ownedConversationsArgs<ExtArgs>
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
   reactions?: boolean | Prisma.User$reactionsArgs<ExtArgs>
+  spaceMemberships?: boolean | Prisma.User$spaceMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  guestId?: boolean
   username?: boolean
-  usernameNormalized?: boolean
   bio?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  guestId?: boolean
+  usernameNormalized?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  guestId?: boolean
   username?: boolean
-  usernameNormalized?: boolean
   bio?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  guestId?: boolean
+  usernameNormalized?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
   id?: boolean
-  guestId?: boolean
   username?: boolean
-  usernameNormalized?: boolean
   bio?: boolean
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  guestId?: boolean
+  usernameNormalized?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "guestId" | "username" | "usernameNormalized" | "bio" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "bio" | "avatarUrl" | "createdAt" | "updatedAt" | "guestId" | "usernameNormalized", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  spaceMemberships?: boolean | Prisma.User$spaceMembershipsArgs<ExtArgs>
   conversations?: boolean | Prisma.User$conversationsArgs<ExtArgs>
+  ownedConversations?: boolean | Prisma.User$ownedConversationsArgs<ExtArgs>
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
   reactions?: boolean | Prisma.User$reactionsArgs<ExtArgs>
+  spaceMemberships?: boolean | Prisma.User$spaceMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -881,20 +1005,21 @@ export type UserIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "User"
   objects: {
-    spaceMemberships: Prisma.$SpaceMemberPayload<ExtArgs>[]
     conversations: Prisma.$ConversationParticipantPayload<ExtArgs>[]
+    ownedConversations: Prisma.$ConversationPayload<ExtArgs>[]
     messages: Prisma.$MessagePayload<ExtArgs>[]
     reactions: Prisma.$MessageReactionPayload<ExtArgs>[]
+    spaceMemberships: Prisma.$SpaceMemberPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    guestId: string
     username: string
-    usernameNormalized: string
     bio: string | null
     avatarUrl: string | null
     createdAt: Date
     updatedAt: Date
+    guestId: string
+    usernameNormalized: string
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -1289,10 +1414,11 @@ readonly fields: UserFieldRefs;
  */
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  spaceMemberships<T extends Prisma.User$spaceMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$spaceMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpaceMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversations<T extends Prisma.User$conversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ownedConversations<T extends Prisma.User$ownedConversationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedConversationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   messages<T extends Prisma.User$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reactions<T extends Prisma.User$reactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessageReactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  spaceMemberships<T extends Prisma.User$spaceMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$spaceMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SpaceMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1323,13 +1449,13 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
  */
 export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
-  readonly guestId: Prisma.FieldRef<"User", 'String'>
   readonly username: Prisma.FieldRef<"User", 'String'>
-  readonly usernameNormalized: Prisma.FieldRef<"User", 'String'>
   readonly bio: Prisma.FieldRef<"User", 'String'>
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly guestId: Prisma.FieldRef<"User", 'String'>
+  readonly usernameNormalized: Prisma.FieldRef<"User", 'String'>
 }
     
 
@@ -1723,30 +1849,6 @@ export type UserDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * User.spaceMemberships
- */
-export type User$spaceMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the SpaceMember
-   */
-  select?: Prisma.SpaceMemberSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the SpaceMember
-   */
-  omit?: Prisma.SpaceMemberOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.SpaceMemberInclude<ExtArgs> | null
-  where?: Prisma.SpaceMemberWhereInput
-  orderBy?: Prisma.SpaceMemberOrderByWithRelationInput | Prisma.SpaceMemberOrderByWithRelationInput[]
-  cursor?: Prisma.SpaceMemberWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.SpaceMemberScalarFieldEnum | Prisma.SpaceMemberScalarFieldEnum[]
-}
-
-/**
  * User.conversations
  */
 export type User$conversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1768,6 +1870,30 @@ export type User$conversationsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.ConversationParticipantScalarFieldEnum | Prisma.ConversationParticipantScalarFieldEnum[]
+}
+
+/**
+ * User.ownedConversations
+ */
+export type User$ownedConversationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Conversation
+   */
+  select?: Prisma.ConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Conversation
+   */
+  omit?: Prisma.ConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationInclude<ExtArgs> | null
+  where?: Prisma.ConversationWhereInput
+  orderBy?: Prisma.ConversationOrderByWithRelationInput | Prisma.ConversationOrderByWithRelationInput[]
+  cursor?: Prisma.ConversationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConversationScalarFieldEnum | Prisma.ConversationScalarFieldEnum[]
 }
 
 /**
@@ -1816,6 +1942,30 @@ export type User$reactionsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.MessageReactionScalarFieldEnum | Prisma.MessageReactionScalarFieldEnum[]
+}
+
+/**
+ * User.spaceMemberships
+ */
+export type User$spaceMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SpaceMember
+   */
+  select?: Prisma.SpaceMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SpaceMember
+   */
+  omit?: Prisma.SpaceMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SpaceMemberInclude<ExtArgs> | null
+  where?: Prisma.SpaceMemberWhereInput
+  orderBy?: Prisma.SpaceMemberOrderByWithRelationInput | Prisma.SpaceMemberOrderByWithRelationInput[]
+  cursor?: Prisma.SpaceMemberWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SpaceMemberScalarFieldEnum | Prisma.SpaceMemberScalarFieldEnum[]
 }
 
 /**

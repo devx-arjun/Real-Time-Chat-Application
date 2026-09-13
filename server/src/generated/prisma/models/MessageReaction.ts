@@ -182,8 +182,8 @@ export type MessageReactionWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"MessageReaction"> | Date | string
   userId?: Prisma.StringFilter<"MessageReaction"> | string
   messageId?: Prisma.StringFilter<"MessageReaction"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   message?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type MessageReactionOrderByWithRelationInput = {
@@ -192,8 +192,8 @@ export type MessageReactionOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   messageId?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   message?: Prisma.MessageOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type MessageReactionWhereUniqueInput = Prisma.AtLeast<{
@@ -206,8 +206,8 @@ export type MessageReactionWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"MessageReaction"> | Date | string
   userId?: Prisma.StringFilter<"MessageReaction"> | string
   messageId?: Prisma.StringFilter<"MessageReaction"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   message?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId_messageId">
 
 export type MessageReactionOrderByWithAggregationInput = {
@@ -236,8 +236,8 @@ export type MessageReactionCreateInput = {
   id?: string
   emoji: string
   createdAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutReactionsInput
   message: Prisma.MessageCreateNestedOneWithoutReactionsInput
+  user: Prisma.UserCreateNestedOneWithoutReactionsInput
 }
 
 export type MessageReactionUncheckedCreateInput = {
@@ -252,8 +252,8 @@ export type MessageReactionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   emoji?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutReactionsNestedInput
   message?: Prisma.MessageUpdateOneRequiredWithoutReactionsNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutReactionsNestedInput
 }
 
 export type MessageReactionUncheckedUpdateInput = {
@@ -564,8 +564,8 @@ export type MessageReactionSelect<ExtArgs extends runtime.Types.Extensions.Inter
   createdAt?: boolean
   userId?: boolean
   messageId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["messageReaction"]>
 
 export type MessageReactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -574,8 +574,8 @@ export type MessageReactionSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   createdAt?: boolean
   userId?: boolean
   messageId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["messageReaction"]>
 
 export type MessageReactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -584,8 +584,8 @@ export type MessageReactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   createdAt?: boolean
   userId?: boolean
   messageId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["messageReaction"]>
 
 export type MessageReactionSelectScalar = {
@@ -598,23 +598,23 @@ export type MessageReactionSelectScalar = {
 
 export type MessageReactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "emoji" | "createdAt" | "userId" | "messageId", ExtArgs["result"]["messageReaction"]>
 export type MessageReactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type MessageReactionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type MessageReactionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $MessageReactionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "MessageReaction"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     message: Prisma.$MessagePayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1016,8 +1016,8 @@ readonly fields: MessageReactionFieldRefs;
  */
 export interface Prisma__MessageReactionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   message<T extends Prisma.MessageDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MessageDefaultArgs<ExtArgs>>): Prisma.Prisma__MessageClient<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

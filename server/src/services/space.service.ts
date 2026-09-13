@@ -30,10 +30,9 @@ async function getGuestById(guestId: string) {
   });
 }
 
-/**
- * Create a new space.
- *
- * The current guest automatically becomes OWNER.
+/*
+ Create a new space.
+ The current guest automatically becomes OWNER.
  */
 export async function createSpace(guestId: string, input: CreateSpaceInput) {
   const guest = await getGuestById(guestId);
@@ -86,9 +85,7 @@ export async function createSpace(guestId: string, input: CreateSpaceInput) {
   });
 }
 
-/**
- * Get all spaces the current guest belongs to.
- */
+// Get all spaces the current guest belongs to.
 export async function getUserSpaces(guestId: string) {
   const guest = await getGuestById(guestId);
 
@@ -126,9 +123,7 @@ export async function getUserSpaces(guestId: string) {
   }));
 }
 
-/**
- * Get spaces the current guest has not joined yet.
- */
+// Get spaces the current guest has not joined yet.
 export async function getDiscoverableSpaces(guestId: string) {
   const guest = await getGuestById(guestId);
 
@@ -162,11 +157,8 @@ export async function getDiscoverableSpaces(guestId: string) {
   return spaces;
 }
 
-/**
- * Get a single space.
- *
- * Only members of the space can access it.
- */
+//  Get a single space.
+//  Only members of the space can access it.
 export async function getSpaceById(guestId: string, spaceId: string) {
   const guest = await getGuestById(guestId);
 
@@ -243,9 +235,7 @@ export async function getSpaceById(guestId: string, spaceId: string) {
   };
 }
 
-/**
- * Join a space.
- */
+// Join a space.
 export async function joinSpace(guestId: string, spaceId: string) {
   const guest = await getGuestById(guestId);
 
@@ -314,9 +304,7 @@ export async function joinSpace(guestId: string, spaceId: string) {
   };
 }
 
-/**
- * Leave a space.
- */
+//  Leave a space.
 export async function leaveSpace(guestId: string, spaceId: string) {
   const guest = await getGuestById(guestId);
 
@@ -365,6 +353,63 @@ export async function leaveSpace(guestId: string, spaceId: string) {
         userId: guest.id,
         spaceId,
       },
+    },
+  });
+
+  return {
+    success: true as const,
+  };
+}
+
+/**
+ Delete a space.
+ Only the space OWNER can delete it.
+ */
+export async function deleteSpace(guestId: string, spaceId: string) {
+  const guest = await getGuestById(guestId);
+
+  if (!guest) {
+    return {
+      error: "GUEST_NOT_FOUND" as const,
+    };
+  }
+
+  const space = await prisma.space.findUnique({
+    where: {
+      id: spaceId,
+    },
+  });
+
+  if (!space) {
+    return {
+      error: "SPACE_NOT_FOUND" as const,
+    };
+  }
+
+  const membership = await prisma.spaceMember.findUnique({
+    where: {
+      userId_spaceId: {
+        userId: guest.id,
+        spaceId,
+      },
+    },
+  });
+
+  if (!membership) {
+    return {
+      error: "NOT_MEMBER" as const,
+    };
+  }
+
+  if (membership.role !== "OWNER") {
+    return {
+      error: "ONLY_OWNER_CAN_DELETE" as const,
+    };
+  }
+
+  await prisma.space.delete({
+    where: {
+      id: spaceId,
     },
   });
 

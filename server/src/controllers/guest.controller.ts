@@ -70,7 +70,7 @@ export async function createGuestController(
 }
 
 export async function getGuestController(
-  req: Request,
+  req: Request<{ guestId: string }>,
   res: Response,
 ) {
   try {

@@ -182,8 +182,8 @@ export type SpaceMemberWhereInput = {
   joinedAt?: Prisma.DateTimeFilter<"SpaceMember"> | Date | string
   userId?: Prisma.StringFilter<"SpaceMember"> | string
   spaceId?: Prisma.StringFilter<"SpaceMember"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   space?: Prisma.XOR<Prisma.SpaceScalarRelationFilter, Prisma.SpaceWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
 export type SpaceMemberOrderByWithRelationInput = {
@@ -192,8 +192,8 @@ export type SpaceMemberOrderByWithRelationInput = {
   joinedAt?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   spaceId?: Prisma.SortOrder
-  user?: Prisma.UserOrderByWithRelationInput
   space?: Prisma.SpaceOrderByWithRelationInput
+  user?: Prisma.UserOrderByWithRelationInput
 }
 
 export type SpaceMemberWhereUniqueInput = Prisma.AtLeast<{
@@ -206,8 +206,8 @@ export type SpaceMemberWhereUniqueInput = Prisma.AtLeast<{
   joinedAt?: Prisma.DateTimeFilter<"SpaceMember"> | Date | string
   userId?: Prisma.StringFilter<"SpaceMember"> | string
   spaceId?: Prisma.StringFilter<"SpaceMember"> | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   space?: Prisma.XOR<Prisma.SpaceScalarRelationFilter, Prisma.SpaceWhereInput>
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId_spaceId">
 
 export type SpaceMemberOrderByWithAggregationInput = {
@@ -236,8 +236,8 @@ export type SpaceMemberCreateInput = {
   id?: string
   role?: $Enums.SpaceRole
   joinedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutSpaceMembershipsInput
   space: Prisma.SpaceCreateNestedOneWithoutMembersInput
+  user: Prisma.UserCreateNestedOneWithoutSpaceMembershipsInput
 }
 
 export type SpaceMemberUncheckedCreateInput = {
@@ -252,8 +252,8 @@ export type SpaceMemberUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.EnumSpaceRoleFieldUpdateOperationsInput | $Enums.SpaceRole
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutSpaceMembershipsNestedInput
   space?: Prisma.SpaceUpdateOneRequiredWithoutMembersNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutSpaceMembershipsNestedInput
 }
 
 export type SpaceMemberUncheckedUpdateInput = {
@@ -568,8 +568,8 @@ export type SpaceMemberSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   joinedAt?: boolean
   userId?: boolean
   spaceId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.SpaceDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["spaceMember"]>
 
 export type SpaceMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -578,8 +578,8 @@ export type SpaceMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   joinedAt?: boolean
   userId?: boolean
   spaceId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.SpaceDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["spaceMember"]>
 
 export type SpaceMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -588,8 +588,8 @@ export type SpaceMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   joinedAt?: boolean
   userId?: boolean
   spaceId?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.SpaceDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["spaceMember"]>
 
 export type SpaceMemberSelectScalar = {
@@ -602,23 +602,23 @@ export type SpaceMemberSelectScalar = {
 
 export type SpaceMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "role" | "joinedAt" | "userId" | "spaceId", ExtArgs["result"]["spaceMember"]>
 export type SpaceMemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.SpaceDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type SpaceMemberIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.SpaceDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 export type SpaceMemberIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   space?: boolean | Prisma.SpaceDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
 
 export type $SpaceMemberPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "SpaceMember"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
     space: Prisma.$SpacePayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1020,8 +1020,8 @@ readonly fields: SpaceMemberFieldRefs;
  */
 export interface Prisma__SpaceMemberClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   space<T extends Prisma.SpaceDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SpaceDefaultArgs<ExtArgs>>): Prisma.Prisma__SpaceClient<runtime.Types.Result.GetResult<Prisma.$SpacePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

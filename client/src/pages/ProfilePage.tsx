@@ -13,7 +13,7 @@ type User = {
 
 type ActivityItem = {
   id: string;
-  type: "joined";
+  type: "joined" | "message";
   room: string;
   text: string;
   createdAt: string;
@@ -175,8 +175,7 @@ export default function ProfilePage() {
                 </h1>
 
                 <p className={`mt-2 text-sm text-slate-400`}>
-                  @{user.username}
-                  {user.country ? ` · ${user.country}` : "· India"}
+                  {user.country ? `${user.country}` : "India"}
                 </p>
               </div>
             </div>
@@ -216,7 +215,7 @@ export default function ProfilePage() {
 
             <Stat value={String(stats.messages)} label="Messages" />
 
-            <Stat value={String(stats.friends)} label="Friends" />
+            {/* <Stat value={String(stats.friends)} label="Friends" /> */}
 
             <Stat value={String(stats.daysOnLinkUp)} label="Days on LinkUp" />
           </div>

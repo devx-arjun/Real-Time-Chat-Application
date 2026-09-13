@@ -59,4 +59,3 @@ export async function getGuestById(guestId: string) {
 
   return guest;
 }
-

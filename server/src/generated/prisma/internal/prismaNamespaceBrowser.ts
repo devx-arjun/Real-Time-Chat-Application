@@ -78,13 +78,13 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const UserScalarFieldEnum = {
   id: 'id',
-  guestId: 'guestId',
   username: 'username',
-  usernameNormalized: 'usernameNormalized',
   bio: 'bio',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  guestId: 'guestId',
+  usernameNormalized: 'usernameNormalized'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -117,11 +117,12 @@ export type SpaceMemberScalarFieldEnum = (typeof SpaceMemberScalarFieldEnum)[key
 export const ConversationScalarFieldEnum = {
   id: 'id',
   title: 'title',
-  isPrivate: 'isPrivate',
-  joinCode: 'joinCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  spaceId: 'spaceId'
+  spaceId: 'spaceId',
+  isPrivate: 'isPrivate',
+  joinCode: 'joinCode',
+  ownerId: 'ownerId'
 } as const
 
 export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]

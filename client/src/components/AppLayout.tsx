@@ -1,29 +1,1105 @@
+// import { useEffect, useState } from "react";
+// import type { FormEvent } from "react";
+// import { Outlet, useNavigate } from "react-router-dom";
+// import { useAuth } from "../context/useAuth";
+// import { createSpace } from "../api/space.api";
+// import Header from "./Header";
+// import {
+//   createPrivateConversation,
+//   joinPrivateConversation,
+// } from "../api/conversation.api";
+
+// export default function AppLayout() {
+//   const navigate = useNavigate();
+//   const { guest } = useAuth();
+
+//   const [scrolled, setScrolled] = useState(false);
+//   const [createSpaceOpen, setCreateSpaceOpen] = useState(false);
+//   const [privateConversationOpen, setPrivateConversationOpen] = useState(false);
+//   const [joinConversationOpen, setJoinConversationOpen] = useState(false);
+//   const [joinCode, setJoinCode] = useState("");
+//   const [joiningConversation, setJoiningConversation] = useState(false);
+//   const [joinConversationError, setJoinConversationError] = useState<
+//     string | null
+//   >(null);
+
+//   const [spaceName, setSpaceName] = useState("");
+//   const [spaceDescription, setSpaceDescription] = useState("");
+//   const [creatingSpace, setCreatingSpace] = useState(false);
+//   const [createSpaceError, setCreateSpaceError] = useState<string | null>(null);
+
+//   const [privateTitle, setPrivateTitle] = useState("");
+//   const [privateConversation, setPrivateConversation] = useState<{
+//     id: string;
+//     joinCode: string;
+//   } | null>(null);
+//   const [creatingPrivateConversation, setCreatingPrivateConversation] =
+//     useState(false);
+//   const [privateConversationError, setPrivateConversationError] = useState<
+//     string | null
+//   >(null);
+//   const [codeCopied, setCodeCopied] = useState(false);
+
+//   async function handleCreateSpace(event: FormEvent<HTMLFormElement>) {
+//     event.preventDefault();
+
+//     const name = spaceName.trim();
+//     const description = spaceDescription.trim();
+
+//     if (!guest) {
+//       setCreateSpaceError("Guest session not found");
+//       return;
+//     }
+
+//     if (name.length < 2) {
+//       setCreateSpaceError("Space name must be at least 2 characters");
+//       return;
+//     }
+
+//     try {
+//       setCreatingSpace(true);
+//       setCreateSpaceError(null);
+
+//       const newSpace = await createSpace({
+//         name,
+//         description: description || undefined,
+//       });
+
+//       setCreateSpaceOpen(false);
+//       setSpaceName("");
+//       setSpaceDescription("");
+
+//       navigate(`/space/${newSpace.id}`);
+//     } catch (error) {
+//       console.error("Failed to create space:", error);
+
+//       setCreateSpaceError(
+//         error instanceof Error ? error.message : "Failed to create space",
+//       );
+//     } finally {
+//       setCreatingSpace(false);
+//     }
+//   }
+
+//   async function handleCreatePrivateConversation(
+//     event: FormEvent<HTMLFormElement>,
+//   ) {
+//     event.preventDefault();
+
+//     try {
+//       setCreatingPrivateConversation(true);
+//       setPrivateConversationError(null);
+
+//       const conversation = await createPrivateConversation(privateTitle);
+
+//       if (!conversation.joinCode) {
+//         throw new Error("Join code was not generated");
+//       }
+
+//       setPrivateConversation({
+//         id: conversation.id,
+//         joinCode: conversation.joinCode,
+//       });
+
+//       setPrivateTitle("");
+//     } catch (error) {
+//       console.error("Failed to create private conversation:", error);
+
+//       setPrivateConversationError(
+//         error instanceof Error
+//           ? error.message
+//           : "Failed to create private conversation",
+//       );
+//     } finally {
+//       setCreatingPrivateConversation(false);
+//     }
+//   }
+
+//   function closePrivateConversation() {
+//     if (creatingPrivateConversation) return;
+
+//     setPrivateConversationOpen(false);
+//     setPrivateConversation(null);
+//     setPrivateTitle("");
+//     setPrivateConversationError(null);
+//     setCodeCopied(false);
+//   }
+
+//   async function handleCopyJoinCode() {
+//     if (!privateConversation?.joinCode) return;
+
+//     try {
+//       await navigator.clipboard.writeText(privateConversation.joinCode);
+//       setCodeCopied(true);
+
+//       window.setTimeout(() => {
+//         setCodeCopied(false);
+//       }, 2000);
+//     } catch (error) {
+//       console.error("Failed to copy join code:", error);
+//     }
+//   }
+
+//   function closeCreateSpace() {
+//     if (creatingSpace) return;
+
+//     setCreateSpaceOpen(false);
+//     setCreateSpaceError(null);
+//   }
+
+//   async function handleJoinConversation(event: FormEvent<HTMLFormElement>) {
+//     event.preventDefault();
+
+//     const code = joinCode.trim().toUpperCase();
+
+//     if (code.length !== 6) {
+//       setJoinConversationError("Join code must be 6 characters");
+//       return;
+//     }
+
+//     try {
+//       setJoiningConversation(true);
+//       setJoinConversationError(null);
+
+//       const result = await joinPrivateConversation(code);
+
+//       setJoinConversationOpen(false);
+//       setJoinCode("");
+
+//       navigate(`/chat/${result.conversationId}`);
+//     } catch (error) {
+//       console.error("Failed to join conversation:", error);
+
+//       setJoinConversationError(
+//         error instanceof Error ? error.message : "Failed to join conversation",
+//       );
+//     } finally {
+//       setJoiningConversation(false);
+//     }
+//   }
+
+//   function closeJoinConversation() {
+//     if (joiningConversation) return;
+
+//     setJoinConversationOpen(false);
+//     setJoinCode("");
+//     setJoinConversationError(null);
+//   }
+
+//   useEffect(() => {
+//     const handleScroll = () => {
+//       setScrolled(window.scrollY > 12);
+//     };
+
+//     handleScroll();
+
+//     window.addEventListener("scroll", handleScroll, {
+//       passive: true,
+//     });
+
+//     return () => {
+//       window.removeEventListener("scroll", handleScroll);
+//     };
+//   }, []);
+
+//   useEffect(() => {
+//     function handleCreateSpace() {
+//       setCreateSpaceOpen(true);
+//     }
+
+//     function handleOpenPrivateConversation() {
+//       setPrivateConversationOpen(true);
+//     }
+
+//     function handleJoinConversation() {
+//       setJoinConversationOpen(true);
+//     }
+
+//     window.addEventListener("linkup:create-space", handleCreateSpace);
+
+//     window.addEventListener(
+//       "linkup:create-private-conversation",
+//       handleOpenPrivateConversation,
+//     );
+
+//     window.addEventListener("linkup:join-conversation", handleJoinConversation);
+
+//     return () => {
+//       window.removeEventListener("linkup:create-space", handleCreateSpace);
+
+//       window.removeEventListener(
+//         "linkup:create-private-conversation",
+//         handleOpenPrivateConversation,
+//       );
+
+//       window.removeEventListener(
+//         "linkup:join-conversation",
+//         handleJoinConversation,
+//       );
+//     };
+//   }, []);
+
+//   return (
+//     <main className="relative min-h-screen bg-[#f4f5f9] text-slate-950">
+//       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+//         <div
+//           className="
+//             absolute
+//             -left-[18rem]
+//             -top-[18rem]
+//             h-[42rem]
+//             w-[42rem]
+//             animate-[linkup-float_16s_ease-in-out_infinite]
+//             rounded-full
+//             bg-violet-400/[0.08]
+//             blur-[150px]
+//           "
+//         />
+
+//         <div
+//           className="
+//             absolute
+//             -right-[18rem]
+//             top-[18%]
+//             h-[38rem]
+//             w-[38rem]
+//             animate-[linkup-float-reverse_20s_ease-in-out_infinite]
+//             rounded-full
+//             bg-cyan-400/[0.07]
+//             blur-[160px]
+//           "
+//         />
+
+//         <div
+//           className="
+//             absolute
+//             left-1/2
+//             top-[65%]
+//             h-[30rem]
+//             w-[30rem]
+//             -translate-x-1/2
+//             animate-[linkup-pulse_12s_ease-in-out_infinite]
+//             rounded-full
+//             bg-indigo-300/[0.045]
+//             blur-[150px]
+//           "
+//         />
+
+//         <div
+//           className="
+//             absolute
+//             inset-0
+//             animate-[linkup-lines_24s_linear_infinite]
+//             opacity-[0.22]
+//           "
+//           style={{
+//             backgroundImage: `
+//               linear-gradient(
+//                 120deg,
+//                 transparent 0%,
+//                 transparent 49.3%,
+//                 rgba(124, 58, 237, 0.055) 49.7%,
+//                 rgba(124, 58, 237, 0.055) 50.3%,
+//                 transparent 50.7%,
+//                 transparent 100%
+//               )
+//             `,
+//             backgroundSize: "52px 52px",
+//           }}
+//         />
+
+//         <div
+//           className="absolute inset-0 opacity-[0.11]"
+//           style={{
+//             backgroundImage: `
+//               linear-gradient(
+//                 rgba(100, 116, 139, 0.13) 1px,
+//                 transparent 1px
+//               ),
+//               linear-gradient(
+//                 90deg,
+//                 rgba(100, 116, 139, 0.13) 1px,
+//                 transparent 1px
+//               )
+//             `,
+//             backgroundSize: "80px 80px",
+//           }}
+//         />
+
+//         <div className="absolute left-0 right-0 top-[72px] h-px bg-gradient-to-r from-transparent via-violet-200/50 to-transparent" />
+
+//         <div className="absolute left-0 right-0 top-[48%] h-px bg-gradient-to-r from-transparent via-slate-200/40 to-transparent" />
+
+//         <div
+//           className="
+//             absolute
+//             bottom-0
+//             left-[6%]
+//             top-0
+//             hidden
+//             w-px
+//             bg-gradient-to-b
+//             from-transparent
+//             via-violet-200/25
+//             to-transparent
+//             2xl:block
+//           "
+//         />
+
+//         <div
+//           className="
+//             absolute
+//             bottom-0
+//             right-[6%]
+//             top-0
+//             hidden
+//             w-px
+//             bg-gradient-to-b
+//             from-transparent
+//             via-cyan-200/25
+//             to-transparent
+//             2xl:block
+//           "
+//         />
+
+//         <div className="absolute left-[7%] top-[18%] hidden h-1.5 w-1.5 animate-pulse rounded-full bg-violet-300/60 2xl:block" />
+
+//         <div className="absolute right-[7%] top-[34%] hidden h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300/60 [animation-delay:1.2s] 2xl:block" />
+
+//         <div className="absolute bottom-[18%] left-[12%] hidden h-1 w-1 animate-pulse rounded-full bg-slate-300 [animation-delay:2s] 2xl:block" />
+//       </div>
+
+//       <header
+//         className={`
+//           sticky
+//           top-0
+//           z-[100]
+//           w-full
+//           transition-all
+//           duration-300
+//           ease-out
+//           ${
+//             scrolled
+//               ? "border-b border-slate-200/80 bg-white/95 shadow-[0_8px_30px_rgba(15,23,42,0.08)] backdrop-blur-2xl"
+//               : "border-b border-slate-200/60 bg-white/90 backdrop-blur-xl"
+//           }
+//         `}
+//       >
+//         <Header />
+//       </header>
+
+//       <section className="relative z-10">
+//         <div className="mx-auto min-h-[calc(100vh-72px)] max-w-[1680px] px-0 sm:px-4 sm:py-2 lg:px-6 xl:px-8">
+//           <div
+//             className="
+//               relative
+//               min-h-[calc(100vh-72px)]
+//               overflow-hidden
+//               bg-white
+//               shadow-[0_20px_70px_rgba(15,23,42,0.06)]
+//               sm:min-h-[calc(100vh-104px)]
+//               sm:rounded-[28px]
+//               sm:border
+//               sm:border-slate-200/70
+//             "
+//           >
+//             {/* Inner top highlight */}
+//             <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-violet-200/70 to-transparent" />
+
+//             {/* Inner atmosphere */}
+//             <div className="pointer-events-none absolute inset-0 overflow-hidden">
+//               <div
+//                 className="
+//                   absolute
+//                   -right-32
+//                   -top-32
+//                   h-72
+//                   w-72
+//                   animate-[linkup-float_18s_ease-in-out_infinite]
+//                   rounded-full
+//                   bg-violet-200/[0.045]
+//                   blur-[100px]
+//                 "
+//               />
+
+//               <div
+//                 className="
+//                   absolute
+//                   -bottom-40
+//                   -left-32
+//                   h-80
+//                   w-80
+//                   animate-[linkup-float-reverse_22s_ease-in-out_infinite]
+//                   rounded-full
+//                   bg-cyan-200/[0.035]
+//                   blur-[110px]
+//                 "
+//               />
+//             </div>
+
+//             {/* Page */}
+//             <div className="relative z-10 animate-[linkup-page-in_500ms_ease-out_both]">
+//               <Outlet />
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {createSpaceOpen && (
+//         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+//           <button
+//             type="button"
+//             aria-label="Close create space dialog"
+//             onClick={closeCreateSpace}
+//             className="absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md"
+//           />
+//           <form
+//             onSubmit={handleCreateSpace}
+//             className={`relative z-10 w-full max-w-lg overflow-hidden rounded-[30px] border shadow-2xl border-slate-200 bg-white shadow-slate-950/15`}
+//           >
+//             <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-violet-500/15 blur-[80px]" />
+
+//             <div className="relative">
+//               <div
+//                 className={`flex items-start justify-between border-b px-6 py-6 sm:px-7 border-slate-100`}
+//               >
+//                 <div className="flex items-start gap-4">
+//                   <div
+//                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-600`}
+//                   >
+//                     {/* <SparkleIcon /> */}
+//                   </div>
+
+//                   <div>
+//                     <p
+//                       className={`text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-400`}
+//                     >
+//                       New community
+//                     </p>
+
+//                     <h2 className="mt-1 text-xl font-semibold tracking-tight">
+//                       Create a space
+//                     </h2>
+
+//                     <p className={`mt-1 text-xs leading-5 text-slate-400`}>
+//                       Give your people somewhere to gather.
+//                     </p>
+//                   </div>
+//                 </div>
+
+//                 <button
+//                   type="button"
+//                   disabled={creatingSpace}
+//                   onClick={closeCreateSpace}
+//                   aria-label="Close"
+//                   className={`flex h-9 w-9 items-center justify-center rounded-xl transition text-slate-400 hover:bg-slate-100 hover:text-slate-700`}
+//                 >
+//                   {/* <CloseIcon /> */}
+//                 </button>
+//               </div>
+
+//               <div className="space-y-5 px-6 py-6 sm:px-7">
+//                 <div>
+//                   <div className="mb-2 flex items-center justify-between">
+//                     <label
+//                       htmlFor="space-name"
+//                       className={`text-xs font-semibold text-slate-700`}
+//                     >
+//                       Space name
+//                     </label>
+
+//                     <span className={`text-[10px] text-slate-300`}>
+//                       {spaceName.length}/50
+//                     </span>
+//                   </div>
+
+//                   <input
+//                     id="space-name"
+//                     autoFocus
+//                     value={spaceName}
+//                     onChange={(event) => setSpaceName(event.target.value)}
+//                     maxLength={50}
+//                     placeholder="e.g. Photography"
+//                     className={`h-12 w-full rounded-xl border px-4 text-sm outline-none transition-all border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-violet-300 focus:bg-white focus:ring-4 focus:ring-violet-500/10`}
+//                   />
+//                 </div>
+
+//                 <div>
+//                   <label
+//                     htmlFor="space-description"
+//                     className={`mb-2 block text-xs font-semibold text-slate-700`}
+//                   >
+//                     Description{" "}
+//                     <span className={`font-normal text-slate-300`}>
+//                       · optional
+//                     </span>
+//                   </label>
+
+//                   <textarea
+//                     id="space-description"
+//                     value={spaceDescription}
+//                     onChange={(event) =>
+//                       setSpaceDescription(event.target.value)
+//                     }
+//                     rows={4}
+//                     placeholder="What is this space about?"
+//                     className={`w-full resize-none rounded-xl border px-4 py-3 text-sm leading-6 outline-none transition-all border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-violet-300 focus:bg-white focus:ring-4 focus:ring-violet-500/10`}
+//                   />
+//                 </div>
+
+//                 {createSpaceError && (
+//                   <div
+//                     className={`flex items-start gap-3 rounded-xl border px-4 py-3 border-red-200 bg-red-50 text-red-500`}
+//                   >
+//                     <span className="font-bold">!</span>
+//                     <p className="text-xs leading-5">{createSpaceError}</p>
+//                   </div>
+//                 )}
+//               </div>
+
+//               <div
+//                 className={`flex gap-3 border-t px-6 py-5 sm:px-7 border-slate-100 bg-slate-50/60`}
+//               >
+//                 <button
+//                   type="button"
+//                   disabled={creatingSpace}
+//                   onClick={closeCreateSpace}
+//                   className={`flex-1 rounded-xl border px-4 py-3 text-sm font-semibold transition border-slate-200 bg-white text-slate-600 hover:bg-slate-50`}
+//                 >
+//                   Cancel
+//                 </button>
+
+//                 <button
+//                   type="submit"
+//                   disabled={creatingSpace || !spaceName.trim()}
+//                   className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-600/15 transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-40"
+//                 >
+//                   {creatingSpace ? (
+//                     <>
+//                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+//                       Creating...
+//                     </>
+//                   ) : (
+//                     <>
+//                       {/* <PlusIcon /> */}
+//                       Create space
+//                     </>
+//                   )}
+//                 </button>
+//               </div>
+//             </div>
+//           </form>
+//         </div>
+//       )}
+
+//       {privateConversationOpen && (
+//         <div
+//           className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm"
+//           onMouseDown={(event) => {
+//             if (event.target === event.currentTarget) {
+//               closePrivateConversation();
+//             }
+//           }}
+//         >
+//           <div className="w-full max-w-md overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.2)]">
+//             <div className="border-b border-slate-200 px-6 py-5">
+//               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-violet-600">
+//                 Private conversation
+//               </p>
+
+//               <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+//                 Start a private conversation
+//               </h2>
+
+//               <p className="mt-1 text-sm leading-6 text-slate-500">
+//                 Create a private chat and invite people using a join code.
+//               </p>
+//             </div>
+
+//             {privateConversation ? (
+//               <div className="px-6 py-6">
+//                 <p className="text-sm font-medium text-slate-700">
+//                   Your conversation is ready.
+//                 </p>
+
+//                 <div className="mt-4 rounded-2xl border border-violet-200 bg-violet-50 px-5 py-5 text-center">
+//                   <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-violet-600">
+//                     Join code
+//                   </p>
+
+//                   <p className="mt-2 font-mono text-3xl font-bold tracking-[0.22em] text-slate-950">
+//                     {privateConversation.joinCode}
+//                   </p>
+
+//                   <button
+//                     type="button"
+//                     onClick={handleCopyJoinCode}
+//                     className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700"
+//                   >
+//                     {codeCopied ? "Copied!" : "Copy code"}
+//                   </button>
+//                 </div>
+
+//                 <div className="mt-5 flex gap-3">
+//                   <button
+//                     type="button"
+//                     onClick={closePrivateConversation}
+//                     className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+//                   >
+//                     Close
+//                   </button>
+
+//                   <button
+//                     type="button"
+//                     onClick={() => {
+//                       const conversationId = privateConversation.id;
+
+//                       closePrivateConversation();
+//                       navigate(`/chat/${conversationId}`);
+//                     }}
+//                     className="flex-1 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+//                   >
+//                     Open chat
+//                   </button>
+//                 </div>
+//               </div>
+//             ) : (
+//               <form
+//                 onSubmit={handleCreatePrivateConversation}
+//                 className="px-6 py-6"
+//               >
+//                 <label className="block">
+//                   <span className="text-sm font-semibold text-slate-800">
+//                     Conversation title
+//                     <span className="ml-1 font-normal text-slate-400">
+//                       (optional)
+//                     </span>
+//                   </span>
+
+//                   <input
+//                     value={privateTitle}
+//                     onChange={(event) => setPrivateTitle(event.target.value)}
+//                     maxLength={100}
+//                     placeholder="e.g. Weekend plans"
+//                     className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:bg-white focus:ring-4 focus:ring-violet-100"
+//                     autoFocus
+//                   />
+//                 </label>
+
+//                 {privateConversationError && (
+//                   <p className="mt-3 text-sm text-red-600">
+//                     {privateConversationError}
+//                   </p>
+//                 )}
+
+//                 <div className="mt-6 flex gap-3">
+//                   <button
+//                     type="button"
+//                     onClick={closePrivateConversation}
+//                     disabled={creatingPrivateConversation}
+//                     className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+//                   >
+//                     Cancel
+//                   </button>
+
+//                   <button
+//                     type="submit"
+//                     disabled={creatingPrivateConversation}
+//                     className="flex-1 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+//                   >
+//                     {creatingPrivateConversation
+//                       ? "Creating..."
+//                       : "Create conversation"}
+//                   </button>
+//                 </div>
+//               </form>
+//             )}
+//           </div>
+//         </div>
+//       )}
+
+//       {joinConversationOpen && (
+//         <div
+//           className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm"
+//           onMouseDown={(event) => {
+//             if (event.target === event.currentTarget) {
+//               closeJoinConversation();
+//             }
+//           }}
+//         >
+//           <div className="w-full max-w-md overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.2)]">
+//             <div className="border-b border-slate-200 px-6 py-5">
+//               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-violet-600">
+//                 Join conversation
+//               </p>
+
+//               <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+//                 Enter your join code
+//               </h2>
+
+//               <p className="mt-1 text-sm leading-6 text-slate-500">
+//                 Use the 6-character code shared by the conversation owner.
+//               </p>
+//             </div>
+
+//             <form onSubmit={handleJoinConversation} className="px-6 py-6">
+//               <label className="block">
+//                 <span className="text-sm font-semibold text-slate-800">
+//                   Join code
+//                 </span>
+
+//                 <input
+//                   value={joinCode}
+//                   onChange={(event) =>
+//                     setJoinCode(
+//                       event.target.value
+//                         .toUpperCase()
+//                         .replace(/[^A-Z0-9]/g, "")
+//                         .slice(0, 6),
+//                     )
+//                   }
+//                   maxLength={6}
+//                   autoFocus
+//                   autoComplete="off"
+//                   spellCheck={false}
+//                   placeholder="ABC123"
+//                   className="mt-2 h-14 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-center font-mono text-xl font-bold tracking-[0.3em] text-slate-950 uppercase outline-none transition placeholder:text-slate-300 focus:border-violet-400 focus:bg-white focus:ring-4 focus:ring-violet-100"
+//                 />
+//               </label>
+
+//               {joinConversationError && (
+//                 <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+//                   {joinConversationError}
+//                 </p>
+//               )}
+
+//               <div className="mt-6 flex gap-3">
+//                 <button
+//                   type="button"
+//                   onClick={closeJoinConversation}
+//                   disabled={joiningConversation}
+//                   className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+//                 >
+//                   Cancel
+//                 </button>
+
+//                 <button
+//                   type="submit"
+//                   disabled={joiningConversation || joinCode.length !== 6}
+//                   className="flex-1 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+//                 >
+//                   {joiningConversation ? "Joining..." : "Join conversation"}
+//                 </button>
+//               </div>
+//             </form>
+//           </div>
+//         </div>
+//       )}
+//     </main>
+//   );
+// }
+
+import {
+  ArrowRight,
+  Check,
+  Copy,
+  MessageCircle,
+  Plus,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import type { FormEvent } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+
+import { useAuth } from "../context/useAuth";
+import {
+  createPrivateConversation,
+  joinPrivateConversation,
+} from "../api/conversation.api";
+import { createSpace } from "../api/space.api";
 import Header from "./Header";
 
 export default function AppLayout() {
-  const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const { guest } = useAuth();
 
+  const [createSpaceOpen, setCreateSpaceOpen] = useState(false);
+  const [privateConversationOpen, setPrivateConversationOpen] = useState(false);
+  const [joinConversationOpen, setJoinConversationOpen] = useState(false);
+
+  const [spaceName, setSpaceName] = useState("");
+  const [spaceDescription, setSpaceDescription] = useState("");
+  const [creatingSpace, setCreatingSpace] = useState(false);
+  const [createSpaceError, setCreateSpaceError] = useState<string | null>(null);
+
+  const [privateTitle, setPrivateTitle] = useState("");
+  const [privateConversation, setPrivateConversation] = useState<{
+    id: string;
+    joinCode: string;
+  } | null>(null);
+
+  const [creatingPrivateConversation, setCreatingPrivateConversation] =
+    useState(false);
+
+  const [privateConversationError, setPrivateConversationError] = useState<
+    string | null
+  >(null);
+
+  const [codeCopied, setCodeCopied] = useState(false);
+
+  const [joinCode, setJoinCode] = useState("");
+  const [joiningConversation, setJoiningConversation] = useState(false);
+  const [joinConversationError, setJoinConversationError] = useState<
+    string | null
+  >(null);
+
+  async function handleCreateSpace(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const name = spaceName.trim();
+    const description = spaceDescription.trim();
+
+    if (!guest) {
+      setCreateSpaceError("Guest session not found");
+      return;
+    }
+
+    if (name.length < 2) {
+      setCreateSpaceError("Space name must be at least 2 characters");
+      return;
+    }
+
+    try {
+      setCreatingSpace(true);
+      setCreateSpaceError(null);
+
+      const newSpace = await createSpace({
+        name,
+        description: description || undefined,
+      });
+
+      setCreateSpaceOpen(false);
+      setSpaceName("");
+      setSpaceDescription("");
+
+      navigate(`/space/${newSpace.id}`);
+    } catch (error) {
+      console.error("Failed to create space:", error);
+
+      setCreateSpaceError(
+        error instanceof Error ? error.message : "Failed to create space",
+      );
+    } finally {
+      setCreatingSpace(false);
+    }
+  }
+
+  async function handleCreatePrivateConversation(
+    event: FormEvent<HTMLFormElement>,
+  ) {
+    event.preventDefault();
+
+    try {
+      setCreatingPrivateConversation(true);
+      setPrivateConversationError(null);
+
+      const conversation = await createPrivateConversation(privateTitle);
+
+      if (!conversation.joinCode) {
+        throw new Error("Join code was not generated");
+      }
+
+      setPrivateConversation({
+        id: conversation.id,
+        joinCode: conversation.joinCode,
+      });
+
+      setPrivateTitle("");
+    } catch (error) {
+      console.error("Failed to create private conversation:", error);
+
+      setPrivateConversationError(
+        error instanceof Error
+          ? error.message
+          : "Failed to create private conversation",
+      );
+    } finally {
+      setCreatingPrivateConversation(false);
+    }
+  }
+
+  function closePrivateConversation() {
+    if (creatingPrivateConversation) return;
+
+    setPrivateConversationOpen(false);
+    setPrivateConversation(null);
+    setPrivateTitle("");
+    setPrivateConversationError(null);
+    setCodeCopied(false);
+  }
+
+  async function handleCopyJoinCode() {
+    if (!privateConversation?.joinCode) return;
+
+    try {
+      await navigator.clipboard.writeText(privateConversation.joinCode);
+
+      setCodeCopied(true);
+
+      window.setTimeout(() => {
+        setCodeCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy join code:", error);
+    }
+  }
+
+  function closeCreateSpace() {
+    if (creatingSpace) return;
+
+    setCreateSpaceOpen(false);
+    setSpaceName("");
+    setSpaceDescription("");
+    setCreateSpaceError(null);
+  }
+
+  async function handleJoinConversation(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const code = joinCode.trim().toUpperCase();
+
+    if (code.length !== 6) {
+      setJoinConversationError("Join code must be 6 characters");
+      return;
+    }
+
+    try {
+      setJoiningConversation(true);
+      setJoinConversationError(null);
+
+      const result = await joinPrivateConversation(code);
+
+      setJoinConversationOpen(false);
+      setJoinCode("");
+
+      const conversationId =
+        "participant" in result
+          ? result.participant.conversationId
+          : result.conversationId;
+
+      navigate(`/chat/${conversationId}`);
+    } catch (error) {
+      console.error("Failed to join conversation:", error);
+
+      setJoinConversationError(
+        error instanceof Error ? error.message : "Failed to join conversation",
+      );
+    } finally {
+      setJoiningConversation(false);
+    }
+  }
+
+  function closeJoinConversation() {
+    if (joiningConversation) return;
+
+    setJoinConversationOpen(false);
+    setJoinCode("");
+    setJoinConversationError(null);
+  }
+
+  /*
+   * Header actions
+   */
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 12);
-    };
+    function handleCreateSpace() {
+      setPrivateConversationOpen(false);
+      setJoinConversationOpen(false);
 
-    handleScroll();
+      setCreateSpaceError(null);
+      setCreateSpaceOpen(true);
+    }
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
+    function handleOpenPrivateConversation() {
+      setCreateSpaceOpen(false);
+      setJoinConversationOpen(false);
+
+      setPrivateConversationError(null);
+      setPrivateConversationOpen(true);
+    }
+
+    function handleJoinConversation() {
+      setCreateSpaceOpen(false);
+      setPrivateConversationOpen(false);
+
+      setJoinConversationError(null);
+      setJoinConversationOpen(true);
+    }
+
+    window.addEventListener("linkup:create-space", handleCreateSpace);
+
+    window.addEventListener(
+      "linkup:create-private-conversation",
+      handleOpenPrivateConversation,
+    );
+
+    window.addEventListener("linkup:join-conversation", handleJoinConversation);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("linkup:create-space", handleCreateSpace);
+
+      window.removeEventListener(
+        "linkup:create-private-conversation",
+        handleOpenPrivateConversation,
+      );
+
+      window.removeEventListener(
+        "linkup:join-conversation",
+        handleJoinConversation,
+      );
     };
   }, []);
 
+  /*
+   * Escape closes active modal
+   */
+  useEffect(() => {
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+
+      if (createSpaceOpen && !creatingSpace) {
+        closeCreateSpace();
+        return;
+      }
+
+      if (privateConversationOpen && !creatingPrivateConversation) {
+        closePrivateConversation();
+        return;
+      }
+
+      if (joinConversationOpen && !joiningConversation) {
+        closeJoinConversation();
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [
+    createSpaceOpen,
+    privateConversationOpen,
+    joinConversationOpen,
+    creatingSpace,
+    creatingPrivateConversation,
+    joiningConversation,
+  ]);
+
   return (
-    <main className="relative min-h-screen bg-[#f4f5f9] text-slate-950">
-      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#f7f8fc] text-slate-950">
+      {/* Global background atmosphere */}
+      <div className="pointer-events-none fixed inset-0 -z-10 min-h-screen">
         <div
           className="
             absolute
@@ -38,7 +1114,6 @@ export default function AppLayout() {
           "
         />
 
-        {/* Cyan ambient glow */}
         <div
           className="
             absolute
@@ -53,7 +1128,6 @@ export default function AppLayout() {
           "
         />
 
-        {/* Center glow */}
         <div
           className="
             absolute
@@ -69,22 +1143,16 @@ export default function AppLayout() {
           "
         />
 
-        {/* Diagonal pattern */}
         <div
-          className="
-            absolute
-            inset-0
-            animate-[linkup-lines_24s_linear_infinite]
-            opacity-[0.22]
-          "
+          className="absolute inset-0 opacity-[0.16]"
           style={{
             backgroundImage: `
               linear-gradient(
                 120deg,
                 transparent 0%,
                 transparent 49.3%,
-                rgba(124, 58, 237, 0.055) 49.7%,
-                rgba(124, 58, 237, 0.055) 50.3%,
+                rgba(124, 58, 237, 0.05) 49.7%,
+                rgba(124, 58, 237, 0.05) 50.3%,
                 transparent 50.7%,
                 transparent 100%
               )
@@ -93,9 +1161,8 @@ export default function AppLayout() {
           }}
         />
 
-        {/* Fine grid */}
         <div
-          className="absolute inset-0 opacity-[0.11]"
+          className="absolute inset-0 opacity-[0.08]"
           style={{
             backgroundImage: `
               linear-gradient(
@@ -112,47 +1179,6 @@ export default function AppLayout() {
           }}
         />
 
-        {/* Horizontal accent */}
-        <div className="absolute left-0 right-0 top-[72px] h-px bg-gradient-to-r from-transparent via-violet-200/50 to-transparent" />
-
-        {/* Middle line */}
-        <div className="absolute left-0 right-0 top-[48%] h-px bg-gradient-to-r from-transparent via-slate-200/40 to-transparent" />
-
-        {/* Left rail */}
-        <div
-          className="
-            absolute
-            bottom-0
-            left-[6%]
-            top-0
-            hidden
-            w-px
-            bg-gradient-to-b
-            from-transparent
-            via-violet-200/25
-            to-transparent
-            2xl:block
-          "
-        />
-
-        {/* Right rail */}
-        <div
-          className="
-            absolute
-            bottom-0
-            right-[6%]
-            top-0
-            hidden
-            w-px
-            bg-gradient-to-b
-            from-transparent
-            via-cyan-200/25
-            to-transparent
-            2xl:block
-          "
-        />
-
-        {/* Decorative dots */}
         <div className="absolute left-[7%] top-[18%] hidden h-1.5 w-1.5 animate-pulse rounded-full bg-violet-300/60 2xl:block" />
 
         <div className="absolute right-[7%] top-[34%] hidden h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-300/60 [animation-delay:1.2s] 2xl:block" />
@@ -160,55 +1186,10 @@ export default function AppLayout() {
         <div className="absolute bottom-[18%] left-[12%] hidden h-1 w-1 animate-pulse rounded-full bg-slate-300 [animation-delay:2s] 2xl:block" />
       </div>
 
-      {/* =========================================================
-          STICKY GLOBAL HEADER
-      ========================================================== */}
-      <header
-        className={`
-          sticky
-          top-0
-          z-[100]
-          w-full
-          transition-all
-          duration-300
-          ease-out
-          ${
-            scrolled
-              ? "border-b border-slate-200/80 bg-white/95 shadow-[0_8px_30px_rgba(15,23,42,0.08)] backdrop-blur-2xl"
-              : "border-b border-slate-200/60 bg-white/90 backdrop-blur-xl"
-          }
-        `}
-      >
-        {/* Animated top accent */}
-        <div
-          className={`
-            pointer-events-none
-            absolute
-            inset-x-0
-            top-0
-            z-[110]
-            h-[2px]
-            origin-left
-            bg-gradient-to-r
-            from-violet-500
-            via-fuchsia-400
-            to-cyan-400
-            transition-transform
-            duration-700
-            ${
-              scrolled
-                ? "scale-x-100"
-                : "scale-x-[0.35]"
-            }
-          `}
-        />
+      {/* Header */}
+      <Header />
 
-        <Header />
-      </header>
-
-      {/* =========================================================
-          CONTENT
-      ========================================================== */}
+      {/* Page content */}
       <section className="relative z-10">
         <div className="mx-auto min-h-[calc(100vh-72px)] max-w-[1680px] px-0 sm:px-4 sm:py-2 lg:px-6 xl:px-8">
           <div
@@ -224,10 +1205,8 @@ export default function AppLayout() {
               sm:border-slate-200/70
             "
           >
-            {/* Inner top highlight */}
             <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-violet-200/70 to-transparent" />
 
-            {/* Inner atmosphere */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               <div
                 className="
@@ -258,7 +1237,6 @@ export default function AppLayout() {
               />
             </div>
 
-            {/* Page */}
             <div className="relative z-10 animate-[linkup-page-in_500ms_ease-out_both]">
               <Outlet />
             </div>
@@ -266,82 +1244,480 @@ export default function AppLayout() {
         </div>
       </section>
 
-      {/* =========================================================
-          ANIMATIONS
-      ========================================================== */}
-      <style>{`
-        @keyframes linkup-float {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) scale(1);
-          }
+      {/* Start a Space */}
+      {createSpaceOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label="Close start space dialog"
+            onClick={closeCreateSpace}
+            className="absolute inset-0 cursor-default bg-slate-950/45 backdrop-blur-sm"
+          />
 
-          50% {
-            transform: translate3d(35px, 25px, 0) scale(1.04);
-          }
-        }
+          <form
+            onSubmit={handleCreateSpace}
+            className="
+              relative
+              z-10
+              w-full
+              max-w-lg
+              overflow-hidden
+              rounded-[28px]
+              border
+              border-slate-200
+              bg-white
+              shadow-[0_30px_100px_rgba(15,23,42,0.18)]
+            "
+          >
+            <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-violet-500/15 blur-[80px]" />
 
-        @keyframes linkup-float-reverse {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) scale(1);
-          }
+            <div className="relative">
+              <div className="flex items-start justify-between border-b border-slate-100 px-6 py-6 sm:px-7">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
 
-          50% {
-            transform: translate3d(-30px, 35px, 0) scale(1.05);
-          }
-        }
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      New community
+                    </p>
 
-        @keyframes linkup-pulse {
-          0%,
-          100% {
-            opacity: 0.55;
-            transform: translateX(-50%) scale(0.96);
-          }
+                    <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+                      Start a space
+                    </h2>
 
-          50% {
-            opacity: 1;
-            transform: translateX(-50%) scale(1.05);
-          }
-        }
+                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                      Give your people somewhere to gather.
+                    </p>
+                  </div>
+                </div>
 
-        @keyframes linkup-lines {
-          0% {
-            transform: translate3d(0, 0, 0);
-          }
+                <button
+                  type="button"
+                  disabled={creatingSpace}
+                  onClick={closeCreateSpace}
+                  aria-label="Close"
+                  className="
+                    flex
+                    h-9
+                    w-9
+                    items-center
+                    justify-center
+                    rounded-xl
+                    text-slate-400
+                    transition
+                    hover:bg-slate-100
+                    hover:text-slate-700
+                  "
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
 
-          50% {
-            transform: translate3d(26px, 18px, 0);
-          }
+              <div className="space-y-5 px-6 py-6 sm:px-7">
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label
+                      htmlFor="space-name"
+                      className="text-xs font-semibold text-slate-700"
+                    >
+                      Space name
+                    </label>
 
-          100% {
-            transform: translate3d(52px, 36px, 0);
-          }
-        }
+                    <span className="text-[10px] text-slate-300">
+                      {spaceName.length}/50
+                    </span>
+                  </div>
 
-        @keyframes linkup-page-in {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
+                  <input
+                    id="space-name"
+                    autoFocus
+                    value={spaceName}
+                    onChange={(event) => setSpaceName(event.target.value)}
+                    maxLength={50}
+                    placeholder="e.g. Photography"
+                    className="
+                      h-12
+                      w-full
+                      rounded-xl
+                      border
+                      border-slate-200
+                      bg-slate-50
+                      px-4
+                      text-sm
+                      text-slate-900
+                      outline-none
+                      transition-all
+                      placeholder:text-slate-400
+                      focus:border-violet-300
+                      focus:bg-white
+                      focus:ring-4
+                      focus:ring-violet-500/10
+                    "
+                  />
+                </div>
 
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+                <div>
+                  <label
+                    htmlFor="space-description"
+                    className="mb-2 block text-xs font-semibold text-slate-700"
+                  >
+                    Description{" "}
+                    <span className="font-normal text-slate-300">
+                      · optional
+                    </span>
+                  </label>
 
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            scroll-behavior: auto !important;
-            transition-duration: 0.01ms !important;
-          }
-        }
-      `}</style>
+                  <textarea
+                    id="space-description"
+                    value={spaceDescription}
+                    onChange={(event) =>
+                      setSpaceDescription(event.target.value)
+                    }
+                    rows={4}
+                    placeholder="What is this space about?"
+                    className="
+                      w-full
+                      resize-none
+                      rounded-xl
+                      border
+                      border-slate-200
+                      bg-slate-50
+                      px-4
+                      py-3
+                      text-sm
+                      leading-6
+                      text-slate-900
+                      outline-none
+                      transition-all
+                      placeholder:text-slate-400
+                      focus:border-violet-300
+                      focus:bg-white
+                      focus:ring-4
+                      focus:ring-violet-500/10
+                    "
+                  />
+                </div>
+
+                {createSpaceError && (
+                  <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-500">
+                    <span className="font-bold">!</span>
+                    <p className="text-xs leading-5">{createSpaceError}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 border-t border-slate-100 bg-slate-50/60 px-6 py-5 sm:px-7">
+                <button
+                  type="button"
+                  disabled={creatingSpace}
+                  onClick={closeCreateSpace}
+                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={creatingSpace || !spaceName.trim()}
+                  className="
+                    flex
+                    flex-1
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-xl
+                    bg-violet-600
+                    px-4
+                    py-3
+                    text-sm
+                    font-semibold
+                    text-white
+                    shadow-lg
+                    shadow-violet-600/15
+                    transition
+                    hover:bg-violet-500
+                    disabled:cursor-not-allowed
+                    disabled:opacity-40
+                  "
+                >
+                  {creatingSpace ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Starting...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4" />
+                      Start space
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Private Conversation */}
+      {privateConversationOpen && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closePrivateConversation();
+            }
+          }}
+        >
+          <div className="w-full max-w-md overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.2)]">
+            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-violet-600">
+                  Private conversation
+                </p>
+
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+                  Start a private conversation
+                </h2>
+
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  Create a private chat and invite people using a join code.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closePrivateConversation}
+                disabled={creatingPrivateConversation}
+                aria-label="Close"
+                className="ml-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {privateConversation ? (
+              <div className="px-6 py-6">
+                <p className="text-sm font-medium text-slate-700">
+                  Your conversation is ready.
+                </p>
+
+                <div className="mt-4 rounded-2xl border border-violet-200 bg-violet-50 px-5 py-5 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-violet-600">
+                    Join code
+                  </p>
+
+                  <p className="mt-2 font-mono text-3xl font-bold tracking-[0.22em] text-slate-950">
+                    {privateConversation.joinCode}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleCopyJoinCode}
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700"
+                  >
+                    {codeCopied ? (
+                      <>
+                        <Check className="h-4 w-4" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copy code
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="mt-5 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={closePrivateConversation}
+                    className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Close
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const conversationId = privateConversation.id;
+
+                      closePrivateConversation();
+                      navigate(`/chat/${conversationId}`);
+                    }}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  >
+                    Open chat
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form
+                onSubmit={handleCreatePrivateConversation}
+                className="px-6 py-6"
+              >
+                <label className="block">
+                  <span className="text-sm font-semibold text-slate-800">
+                    Conversation title
+                    <span className="ml-1 font-normal text-slate-400">
+                      (optional)
+                    </span>
+                  </span>
+
+                  <input
+                    value={privateTitle}
+                    onChange={(event) => setPrivateTitle(event.target.value)}
+                    maxLength={100}
+                    placeholder="e.g. Weekend plans"
+                    className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:bg-white focus:ring-4 focus:ring-violet-100"
+                    autoFocus
+                  />
+                </label>
+
+                {privateConversationError && (
+                  <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    {privateConversationError}
+                  </p>
+                )}
+
+                <div className="mt-6 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={closePrivateConversation}
+                    disabled={creatingPrivateConversation}
+                    className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={creatingPrivateConversation}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {creatingPrivateConversation ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                        Starting...
+                      </>
+                    ) : (
+                      <>
+                        <MessageCircle className="h-4 w-4" />
+                        Start conversation
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Join Conversation */}
+      {joinConversationOpen && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/35 px-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              closeJoinConversation();
+            }
+          }}
+        >
+          <div className="w-full max-w-md overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_30px_100px_rgba(15,23,42,0.2)]">
+            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-violet-600">
+                  Join conversation
+                </p>
+
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950">
+                  Enter your join code
+                </h2>
+
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  Use the 6-character code shared by the conversation owner.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeJoinConversation}
+                disabled={joiningConversation}
+                aria-label="Close"
+                className="ml-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleJoinConversation} className="px-6 py-6">
+              <label className="block">
+                <span className="text-sm font-semibold text-slate-800">
+                  Join code
+                </span>
+
+                <input
+                  value={joinCode}
+                  onChange={(event) =>
+                    setJoinCode(
+                      event.target.value
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, "")
+                        .slice(0, 6),
+                    )
+                  }
+                  maxLength={6}
+                  autoFocus
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder="ABC123"
+                  className="mt-2 h-14 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-center font-mono text-xl font-bold tracking-[0.3em] text-slate-950 uppercase outline-none transition placeholder:text-slate-300 focus:border-violet-400 focus:bg-white focus:ring-4 focus:ring-violet-100"
+                />
+              </label>
+
+              {joinConversationError && (
+                <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                  {joinConversationError}
+                </p>
+              )}
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  type="button"
+                  onClick={closeJoinConversation}
+                  disabled={joiningConversation}
+                  className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={joiningConversation || joinCode.length !== 6}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {joiningConversation ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      Joining...
+                    </>
+                  ) : (
+                    <>
+                      Join conversation
+                      <ArrowRight className="h-4 w-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

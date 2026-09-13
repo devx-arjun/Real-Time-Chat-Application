@@ -7,38 +7,32 @@ datasource db {
   provider = "postgresql"
 }
 
-enum SpaceRole {
-  OWNER
-  MODERATOR
-  MEMBER
-}
-
 model User {
   id                 String                    @id @default(cuid())
-  guestId            String                    @unique
   username           String
-  usernameNormalized String                    @unique
   bio                String?
   avatarUrl          String?
   createdAt          DateTime                  @default(now())
   updatedAt          DateTime                  @updatedAt
-  spaceMemberships   SpaceMember[]
+  guestId            String                    @unique
+  usernameNormalized String                    @unique
   conversations      ConversationParticipant[]
+  ownedConversations Conversation[]            @relation("ConversationOwner")
   messages           Message[]
   reactions          MessageReaction[]
+  spaceMemberships   SpaceMember[]
 }
 
 model Space {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?
-  imageUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  members       SpaceMember[]
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  description   String?
+  imageUrl      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   conversations Conversation[]
+  members       SpaceMember[]
 
   @@index([createdAt])
 }
@@ -47,12 +41,10 @@ model SpaceMember {
   id       String    @id @default(cuid())
   role     SpaceRole @default(MEMBER)
   joinedAt DateTime  @default(now())
-
-  userId  String
-  spaceId String
-
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  space Space @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  userId   String
+  spaceId  String
+  space    Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, spaceId])
   @@index([userId])
@@ -60,33 +52,32 @@ model SpaceMember {
 }
 
 model Conversation {
-  id    String  @id @default(cuid())
-  title String?
-
-  isPrivate Boolean @default(false)
-  joinCode  String? @unique
-
+  id        String   @id @default(cuid())
+  title     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  spaceId   String?
+  isPrivate Boolean  @default(false)
+  joinCode  String?  @unique
 
-  spaceId String?
-  space   Space?  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  ownerId String
+  owner   User   @relation("ConversationOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
+  space        Space?                    @relation(fields: [spaceId], references: [id], onDelete: Cascade)
   participants ConversationParticipant[]
   messages     Message[]
 
   @@index([spaceId, createdAt])
+  @@index([ownerId])
 }
 
 model ConversationParticipant {
-  id       String   @id @default(cuid())
-  joinedAt DateTime @default(now())
-
+  id             String       @id @default(cuid())
+  joinedAt       DateTime     @default(now())
   userId         String
   conversationId String
-
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, conversationId])
   @@index([userId])
@@ -94,23 +85,19 @@ model ConversationParticipant {
 }
 
 model Message {
-  id        String    @id @default(cuid())
-  content   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
+  id             String            @id @default(cuid())
+  content        String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  deletedAt      DateTime?
   senderId       String
   conversationId String
   replyToId      String?
-
-  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-
-  replyTo Message?  @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
-  replies Message[] @relation("MessageReplies")
-
-  reactions MessageReaction[]
+  conversation   Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  replyTo        Message?          @relation("MessageReplies", fields: [replyToId], references: [id])
+  replies        Message[]         @relation("MessageReplies")
+  sender         User              @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reactions      MessageReaction[]
 
   @@index([conversationId, createdAt])
   @@index([senderId, createdAt])
@@ -120,13 +107,17 @@ model MessageReaction {
   id        String   @id @default(cuid())
   emoji     String
   createdAt DateTime @default(now())
-
   userId    String
   messageId String
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, messageId])
   @@index([messageId])
+}
+
+enum SpaceRole {
+  OWNER
+  MODERATOR
+  MEMBER
 }

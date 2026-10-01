@@ -88,9 +88,7 @@ export default function Header() {
 
   function openCreatePrivateConversation() {
     closeAllMenus();
-    window.dispatchEvent(
-      new Event("linkup:create-private-conversation"),
-    );
+    window.dispatchEvent(new Event("linkup:create-private-conversation"));
   }
 
   function openJoinConversation() {
@@ -138,17 +136,11 @@ export default function Header() {
     function handlePointerDown(event: PointerEvent) {
       const target = event.target as Node;
 
-      if (
-        createMenuRef.current &&
-        !createMenuRef.current.contains(target)
-      ) {
+      if (createMenuRef.current && !createMenuRef.current.contains(target)) {
         setCreateOpen(false);
       }
 
-      if (
-        profileMenuRef.current &&
-        !profileMenuRef.current.contains(target)
-      ) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(target)) {
         setProfileOpen(false);
       }
     }
@@ -166,34 +158,54 @@ export default function Header() {
   }, [location.pathname]);
 
   return (
-    <header className="sticky top-0 z-[100] w-full bg-white">
+    <header
+      className="
+    sticky
+    top-0
+    z-[100]
+    w-full
+    border-b
+    border-slate-200/70
+    bg-white/30
+  "
+    >
+      <div
+        className="
+      pointer-events-none
+      absolute
+      inset-x-0
+      bottom-0
+      h-px
+      bg-gradient-to-r
+      from-transparent
+      via-violet-300/70
+      to-transparent
+    "
+      />
       <nav className="relative mx-auto flex h-[70px] max-w-[1500px] items-center justify-between px-5 md:px-10 lg:px-16 xl:px-24">
         {/* Logo */}
         <Link
           to="/home"
           onClick={closeAllMenus}
-          className="group flex shrink-0 items-center gap-2.5"
+          className="flex shrink-0 items-center gap-2.5"
         >
           <div
             className="
-              relative
-              flex
-              h-9
-              w-9
-              items-center
-              justify-center
-              rounded-[11px]
-              bg-slate-950
-              text-[15px]
-              font-black
-              tracking-[-0.04em]
-              text-white
-              transition
-              group-hover:-translate-y-0.5
-            "
+    relative
+    flex
+    h-9
+    w-9
+    items-center
+    justify-center
+    rounded-[11px]
+    text-[15px]
+    font-black
+    tracking-[-0.04em]
+    shadow-sm
+    shadow-violet-600/20
+  "
           >
             L
-
             <span
               className="
                 absolute
@@ -210,7 +222,7 @@ export default function Header() {
           </div>
 
           <div className="hidden sm:block">
-            <span className="block text-[18px] font-black leading-none tracking-[-0.055em] text-slate-950">
+            <span className="block text-[17px] font-black leading-none tracking-[-0.055em] text-slate-950">
               LinkUp
             </span>
 
@@ -563,10 +575,7 @@ export default function Header() {
                       </span>
                     </span>
 
-                    <ArrowRight
-                      size={13}
-                      className="text-zinc-300"
-                    />
+                    <ArrowRight size={13} className="text-zinc-300" />
                   </Link>
                 </div>
               </div>
@@ -620,11 +629,7 @@ export default function Header() {
                 w-5
                 bg-zinc-800
                 transition-transform
-                ${
-                  menuOpen
-                    ? "translate-y-2 rotate-45"
-                    : ""
-                }
+                ${menuOpen ? "translate-y-2 rotate-45" : ""}
               `}
             />
 
@@ -646,11 +651,7 @@ export default function Header() {
                 w-5
                 bg-zinc-800
                 transition-transform
-                ${
-                  menuOpen
-                    ? "-translate-y-2 -rotate-45"
-                    : ""
-                }
+                ${menuOpen ? "-translate-y-2 -rotate-45" : ""}
               `}
             />
           </button>
@@ -666,7 +667,8 @@ export default function Header() {
               w-full
               border-t
               border-zinc-200
-              bg-white
+              bg-white/60
+              backdrop-blur-3xl
               px-5
               pb-5
               pt-3
@@ -722,7 +724,7 @@ export default function Header() {
                 "
               >
                 Create a Space
-                <Plus size={16} />
+                <Plus size={16} className="bg-violet-50 text-violet-600" />
               </button>
 
               <button
@@ -745,7 +747,10 @@ export default function Header() {
                 "
               >
                 Private Conversation
-                <MessageCircle size={16} />
+                <MessageCircle
+                  size={16}
+                  className="bg-emerald-50 text-emerald-600"
+                />
               </button>
 
               <button
@@ -768,7 +773,7 @@ export default function Header() {
                 "
               >
                 Join Conversation
-                <ArrowRight size={16} />
+                <ArrowRight size={16} className="bg-zinc-100 text-zinc-600" />
               </button>
 
               <Link
@@ -816,9 +821,7 @@ export default function Header() {
                     {username}
                   </p>
 
-                  <p className="text-[10px] text-zinc-400">
-                    View profile
-                  </p>
+                  <p className="text-[10px] text-zinc-400">View profile</p>
                 </div>
               </Link>
             </div>
@@ -830,10 +833,7 @@ export default function Header() {
       {searchOpen && (
         <div className="border-t border-zinc-100 bg-white px-5 pb-4 md:hidden">
           <div className="flex h-11 items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4">
-            <Search
-              size={16}
-              className="shrink-0 text-zinc-400"
-            />
+            <Search size={16} className="shrink-0 text-zinc-400" />
 
             <input
               ref={searchInputRef}
@@ -944,4 +944,3 @@ function CreateMenuItem({
     </button>
   );
 }
-

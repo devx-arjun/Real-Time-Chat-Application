@@ -166,7 +166,7 @@ export default function DiscoverPage() {
       <div className="relative z-10 mx-auto min-h-screen max-w-[1350px] px-5 sm:px-8 lg:px-12">
         {/* Hero */}
 
-        <section className="relative pt-16 sm:pt-20 lg:pt-24 pb-8 sm:pb-12 lg:pb-16">
+        <section className="relative pt-12 sm:pt-18 lg:pt-20 pb-8 sm:pb-12 lg:pb-16">
           <div className="max-w-4xl">
             <div className="mb-5 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.3em] text-violet-600">
               <span className="h-px w-7 bg-violet-400" />
@@ -259,7 +259,7 @@ export default function DiscoverPage() {
         )}
 
         {/* Discover */}
-        <section className="pb-20">
+        <section className="pb-15 sm:pb-20">
           <div className="mb-7 flex items-end justify-between gap-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
@@ -503,7 +503,7 @@ function EmptyState({
   const hasFilters = Boolean(search) || filter !== "All";
 
   return (
-    <div className="border border-dashed border-slate-300 bg-white/50 px-6 py-16 text-center">
+    <div className="border border-dashed border-slate-300 bg-white/50 px-5 py-10 text-center">
       <div className="mx-auto flex h-12 w-12 items-center justify-center bg-slate-100 text-slate-400">
         <Compass className="h-5 w-5" />
       </div>

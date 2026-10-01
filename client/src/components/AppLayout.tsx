@@ -471,7 +471,7 @@ export default function AppLayout() {
             <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-violet-500/15 blur-[80px]" />
 
             <div className="relative">
-              <div className="flex items-start justify-between border-b border-slate-100 px-6 py-6 sm:px-7">
+              <div className="flex items-start justify-between border-b border-slate-100 px-5 py-6 sm:px-7">
                 <div className="flex items-start gap-4">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
                     <Sparkles className="h-5 w-5" />
@@ -514,7 +514,7 @@ export default function AppLayout() {
                 </button>
               </div>
 
-              <div className="space-y-5 px-6 py-6 sm:px-7">
+              <div className="space-y-5 px-5 py-6 sm:px-7">
                 <div>
                   <div className="mb-2 flex items-center justify-between">
                     <label
@@ -607,7 +607,7 @@ export default function AppLayout() {
                 )}
               </div>
 
-              <div className="flex gap-3 border-t border-slate-100 bg-slate-50/60 px-6 py-5 sm:px-7">
+              <div className="flex gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-5 sm:px-7">
                 <button
                   type="button"
                   disabled={creatingSpace}
@@ -628,7 +628,7 @@ export default function AppLayout() {
                     gap-2
                     rounded-xl
                     bg-violet-600
-                    px-4
+                    px-2 sm:px-4
                     py-3
                     text-sm
                     font-semibold
@@ -644,7 +644,7 @@ export default function AppLayout() {
                   {creatingSpace ? (
                     <>
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Starting...
+                      Creating...
                     </>
                   ) : (
                     <>

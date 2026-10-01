@@ -1,6 +1,13 @@
+import type { ConversationParticipant } from "../api/conversation.api";
+
 type SocketPayload = Record<string, unknown>;
 
-type MessageListener = (message: SocketPayload) => void;
+type SocketMessage = SocketPayload & {
+  type?: string;
+  participant?: ConversationParticipant;
+};
+
+type MessageListener = (message: SocketMessage) => void;
 type ErrorListener = (message: string) => void;
 type AuthListener = () => void;
 type ConnectionListener = (connected: boolean) => void;
@@ -94,7 +101,7 @@ class LinkUpSocket {
 
     this.socket.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data) as SocketPayload;
+        const data = JSON.parse(event.data) as SocketMessage;
 
         console.log("WebSocket received:", data);
 

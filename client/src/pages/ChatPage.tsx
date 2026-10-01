@@ -9,7 +9,6 @@ import {
   MoreHorizontal,
   Paperclip,
   Pencil,
-  Search,
   Send,
   Smile,
   Trash2,

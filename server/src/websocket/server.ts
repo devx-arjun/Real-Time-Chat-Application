@@ -67,7 +67,7 @@ function leaveConversation(conversationId: string, socket: WebSocket) {
   }
 }
 
-function broadcastToConversation(conversationId: string, payload: unknown) {
+export function broadcastToConversation(conversationId: string, payload: unknown) {
   const sockets = conversationConnections.get(conversationId);
 
   if (!sockets) {

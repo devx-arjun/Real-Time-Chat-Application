@@ -167,7 +167,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-[100] w-full bg-white">
-      <nav className="relative mx-auto flex h-[72px] max-w-[1500px] items-center justify-between px-5 md:px-10 lg:px-16 xl:px-24">
+      <nav className="relative mx-auto flex h-[70px] max-w-[1500px] items-center justify-between px-5 md:px-10 lg:px-16 xl:px-24">
         {/* Logo */}
         <Link
           to="/home"

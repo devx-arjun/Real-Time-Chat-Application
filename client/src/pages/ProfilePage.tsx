@@ -211,19 +211,15 @@ export default function ProfilePage() {
           <div
             className={`mt-10 flex flex-wrap gap-x-10 gap-y-5 border-y py-6 border-slate-200`}
           >
-            <Stat value={String(stats.rooms)} label="Rooms" />
+            <Stat value={String(stats.rooms)} label="Spaces" />
 
             <Stat value={String(stats.messages)} label="Messages" />
-
-            {/* <Stat value={String(stats.friends)} label="Friends" /> */}
 
             <Stat value={String(stats.daysOnLinkUp)} label="Days on LinkUp" />
           </div>
         </section>
 
-        {/* =====================================================
-            CONTENT
-        ====================================================== */}
+        {/* CONTENT */}
 
         <div className="grid gap-14 pb-16 lg:grid-cols-[minmax(0,1fr)_320px]">
           <section>
@@ -249,7 +245,7 @@ export default function ProfilePage() {
                   activeTab === "rooms" ? "text-slate-950" : "text-slate-400"
                 }`}
               >
-                Rooms
+                Spaces
                 {activeTab === "rooms" && (
                   <span className="absolute bottom-[-1px] left-0 h-px w-full bg-violet-500" />
                 )}
@@ -262,7 +258,7 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-4">
                 {rooms.length === 0 ? (
-                  <EmptyState text="You haven't joined any rooms yet." />
+                  <EmptyState text="You haven't joined any spaces yet." />
                 ) : (
                   rooms.map((room) => <ProfileRoom key={room.id} room={room} />)
                 )}
@@ -270,9 +266,7 @@ export default function ProfilePage() {
             )}
           </section>
 
-          {/* =================================================
-              PROFILE INFO
-          ================================================== */}
+          {/* PROFILE INFO */}
 
           <aside className="space-y-5">
             <div
@@ -332,9 +326,7 @@ export default function ProfilePage() {
   );
 }
 
-/* ===============================================================
-   STAT
-================================================================ */
+//  STAT
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
@@ -350,9 +342,7 @@ function Stat({ value, label }: { value: string; label: string }) {
   );
 }
 
-/* ===============================================================
-   ACTIVITY
-================================================================ */
+//  ACTIVITY
 
 function ActivityList({ activity }: { activity: ActivityItem[] }) {
   if (activity.length === 0) {
@@ -454,9 +444,7 @@ function ProfileRoom({ room }: { room: Room }) {
   );
 }
 
-/* ===============================================================
-   INFO ROW
-================================================================ */
+//  INFO ROW
 
 function InfoRow({
   icon,

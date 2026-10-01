@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:17
     container_name: linkup-postgres
@@ -18,49 +17,9 @@ services:
     networks:
       - linkup-network
 
-
-  backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-
-    container_name: linkup-backend
-
-    environment:
-      DATABASE_URL: postgresql://linkup:linkup_dev_password@postgres:5432/linkup
-      NODE_ENV: production
-
-    ports:
-      - "5000:5000"
-
-    depends_on:
-      - postgres
-
-    networks:
-      - linkup-network
-
-
-  frontend:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
-
-    container_name: linkup-frontend
-
-    ports:
-      - "3000:80"
-
-    depends_on:
-      - backend
-
-    networks:
-      - linkup-network
-
-
 networks:
   linkup-network:
     driver: bridge
-
 
 volumes:
   postgres_data:

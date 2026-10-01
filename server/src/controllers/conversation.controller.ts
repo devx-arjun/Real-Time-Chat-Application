@@ -11,6 +11,7 @@ import {
   deleteConversation,
   getMyPrivateConversations,
 } from "../services/conversation.service.js";
+import { broadcastToConversation } from "../websocket/server.js";
 
 function getGuestId(req: Request): string | null {
   const guestId = req.headers["x-guest-id"];
@@ -289,6 +290,14 @@ export async function join(req: Request, res: Response) {
       });
     }
 
+    if (result.participant) {
+      broadcastToConversation(result.participant.conversationId, {
+        type: "conversation:participant_joined",
+        conversationId: result.participant.conversationId,
+        participant: result.participant,
+      });
+    }
+
     return res.status(201).json(result);
   } catch (error) {
     console.error("Join conversation error:", error);
@@ -348,6 +357,14 @@ export async function joinPrivate(req: Request, res: Response) {
       return res.status(200).json(result);
     }
 
+    if (result.participant) {
+      broadcastToConversation(result.participant.conversationId, {
+        type: "conversation:participant_joined",
+        conversationId: result.participant.conversationId,
+        participant: result.participant,
+      });
+    }
+
     return res.status(201).json(result);
   } catch (error) {
     console.error("Join private conversation error:", error);
@@ -375,10 +392,7 @@ export async function leave(req: Request, res: Response) {
       });
     }
 
-    const result = await leaveConversation(
-      guestId,
-      conversationId.trim(),
-    );
+    const result = await leaveConversation(guestId, conversationId.trim());
 
     if (result.error === "GUEST_NOT_FOUND") {
       return res.status(404).json({
@@ -400,9 +414,16 @@ export async function leave(req: Request, res: Response) {
 
     if (result.error === "OWNER_CANNOT_LEAVE") {
       return res.status(403).json({
-        message: "The conversation owner cannot leave. Delete the conversation instead.",
+        message:
+          "The conversation owner cannot leave. Delete the conversation instead.",
       });
     }
+
+    broadcastToConversation(conversationId.trim(), {
+      type: "conversation:participant_left",
+      conversationId: conversationId.trim(),
+      userId: result.userId,
+    });
 
     return res.status(200).json({
       message: "You left the conversation",
@@ -433,10 +454,7 @@ export async function remove(req: Request, res: Response) {
       });
     }
 
-    const result = await deleteConversation(
-      guestId,
-      conversationId.trim(),
-    );
+    const result = await deleteConversation(guestId, conversationId.trim());
 
     if (result.error === "GUEST_NOT_FOUND") {
       return res.status(404).json({

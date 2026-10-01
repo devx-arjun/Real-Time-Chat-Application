@@ -223,24 +223,18 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="relative min-h-screen text-slate-950">
+    <main className="relative min-h-screen overflow-hidden bg-[#f7f8fc] text-slate-950">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        {" "}
-        {/* Violet glow */}{" "}
-        <div className="absolute -left-40 -top-40 h-[32rem] w-[32rem] rounded-full bg-violet-300/20 blur-[140px]" />{" "}
-        {/* Cyan glow */}{" "}
-        <div className="absolute -right-48 top-[25%] h-[36rem] w-[36rem] rounded-full bg-cyan-300/15 blur-[150px]" />{" "}
-        {/* Fuchsia glow */}{" "}
-        <div className="absolute bottom-[-14rem] left-[35%] h-[30rem] w-[30rem] rounded-full bg-fuchsia-300/15 blur-[150px]" />{" "}
-        {/* Grid */}{" "}
+        <div className="absolute -left-40 -top-40 h-[32rem] w-[32rem] rounded-full bg-violet-300/20 blur-[140px]" />
+        <div className="absolute -right-40 -bottom-40 h-[36rem] w-[36rem] rounded-full bg-cyan-300/15 blur-[140px]" />
+        <div className="absolute bottom-[-14rem] left-[35%] h-[30rem] w-[30rem] rounded-full bg-fuchsia-300/15 blur-[150px]" />
         <div
           className="absolute inset-0 opacity-[0.025]"
           style={{
             backgroundImage: ` linear-gradient(rgba(15,23,42,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,.8) 1px, transparent 1px) `,
             backgroundSize: "48px 48px",
           }}
-        />{" "}
-        {/* Fine dot texture */}{" "}
+        />
         <div
           className="absolute inset-0 opacity-[0.025]"
           style={{
@@ -249,15 +243,15 @@ export default function DashboardPage() {
           }}
         />{" "}
       </div>
-      <div className="mx-auto max-w-[1300px] px-4 pb-20 pt-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1350px] px-5 pt-8 sm:px-8 lg:px-12">
         {/* Intro */}
-        <section className="relative py-8 sm:py-12 lg:py-16">
+        <section className="relative py-8 sm:py-10 lg:py-14">
           <div className="relative max-w-4xl">
             <div className="mb-5 flex items-center gap-2">
               <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
 
               <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                {greeting} · Your LinkUp
+                Good {greeting}
               </p>
             </div>
 
@@ -607,7 +601,7 @@ export default function DashboardPage() {
           )}
         </section>
         {/* Explore strip */}
-        <section className="mt-14 grid gap-3 lg:grid-cols-[1.35fr_0.65fr]">
+        <section className="py-12 grid gap-3 lg:grid-cols-[1.35fr_0.65fr]">
           <Link
             to="/discover"
             className="group relative overflow-hidden rounded-2xl border border-violet-200/70 bg-violet-50/60 p-6 transition duration-200 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_14px_35px_rgba(100,70,180,0.08)]"
@@ -660,7 +654,7 @@ export default function DashboardPage() {
           </Link>
         </section>
         {/* Footer */}
-        <footer className="mt-14 flex flex-col gap-3 border-t border-slate-200/70 pt-6 text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+        <footer className="py-7 flex flex-col gap-3 border-t border-slate-200/70 pt-6 text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 flex-row items-center justify-between">
           <span>LinkUp © 2026</span>
 
           <div className="flex items-center gap-3">

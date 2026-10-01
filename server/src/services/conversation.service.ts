@@ -539,6 +539,7 @@ export async function leaveConversation(
 
   return {
     success: true as const,
+    userId: user.id,
   };
 }
 

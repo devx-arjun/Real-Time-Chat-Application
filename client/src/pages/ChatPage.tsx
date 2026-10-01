@@ -197,6 +197,8 @@ export default function ChatPage() {
   } | null>(null);
 
   const isParticipantRef = useRef<boolean | null>(null);
+  const infoButtonRef = useRef<HTMLButtonElement | null>(null);
+  const infoPanelRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     isParticipantRef.current = isParticipant;
@@ -645,6 +647,92 @@ export default function ChatPage() {
       }
 
       /*
+       * PARTICIPANT JOINED
+       */
+
+      if (data.type === "conversation:participant_joined") {
+        if (data.conversationId !== conversationId) {
+          return;
+        }
+
+        const participant = data.participant;
+
+        if (!participant?.id || !participant.user?.id) {
+          return;
+        }
+
+        setConversation((current) => {
+          if (!current) {
+            return current;
+          }
+
+          const alreadyExists = current.participants?.some(
+            (item) => item.id === participant.id,
+          );
+
+          if (alreadyExists) {
+            return current;
+          }
+
+          return {
+            ...current,
+            participants: [...(current.participants ?? []), participant],
+            _count: {
+              ...current._count,
+              participants: (current._count?.participants ?? 0) + 1,
+            },
+          };
+        });
+
+        return;
+      }
+
+      /*
+       * PARTICIPANT LEFT
+       */
+
+      if (data.type === "conversation:participant_left") {
+        if (
+          data.conversationId !== conversationId ||
+          typeof data.userId !== "string"
+        ) {
+          return;
+        }
+
+        setConversation((current) => {
+          if (!current) {
+            return current;
+          }
+
+          const participants = current.participants ?? [];
+
+          const removed = participants.some(
+            (item) => item.user?.id === data.userId,
+          );
+
+          if (!removed) {
+            return current;
+          }
+
+          return {
+            ...current,
+            participants: participants.filter(
+              (item) => item.user?.id !== data.userId,
+            ),
+            _count: {
+              ...current._count,
+              participants: Math.max(
+                0,
+                (current._count?.participants ?? participants.length) - 1,
+              ),
+            },
+          };
+        });
+
+        return;
+      }
+
+      /*
        * TYPING START
        */
 
@@ -1028,6 +1116,33 @@ export default function ChatPage() {
     };
   }, [conversationActionLoading]);
 
+  useEffect(() => {
+    if (!showInfo) {
+      return;
+    }
+
+    function handleOutsideClick(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node;
+
+      if (
+        infoPanelRef.current?.contains(target) ||
+        infoButtonRef.current?.contains(target)
+      ) {
+        return;
+      }
+
+      setShowInfo(false);
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [showInfo]);
+
   async function handleDeleteConversation() {
     if (!conversationId || conversationActionLoading) {
       return;
@@ -1081,12 +1196,9 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-92px)] flex-col overflow-hidden rounded-[26px] border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.07)]">
-      {/* =====================================================
-          CHAT HEADER
-      ====================================================== */}
-
-      <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200/70 bg-white px-4 sm:px-6">
+    <div className="flex h-[calc(100vh-75px)] md:h-[calc(100vh-90px)] min-h-0 flex-col overflow-hidden rounded-[26px] border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.07)]">
+      {/* CHAT HEADER */}
+      <header className="flex h-[65px] shrink-0 items-center justify-between border-b border-slate-200/70 bg-white px-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Link
             to={
@@ -1175,31 +1287,13 @@ export default function ChatPage() {
               hover:text-slate-900
               sm:grid
             "
-            aria-label="Search messages"
-          >
-            <Search size={17} />
-          </button>
-
-          <button
-            type="button"
-            className="
-              hidden
-              h-9
-              w-9
-              place-items-center
-              rounded-xl
-              text-slate-400
-              transition
-              hover:bg-slate-100
-              hover:text-slate-900
-              sm:grid
-            "
             aria-label="Notifications"
           >
             <Bell size={17} />
           </button>
 
           <button
+            ref={infoButtonRef}
             type="button"
             onClick={() => setShowInfo((value) => !value)}
             className={[
@@ -1308,32 +1402,9 @@ export default function ChatPage() {
           </div>
         </div>
       </header>
-
-      {/* =====================================================
-          CHAT BODY
-      ====================================================== */}
-
-      <div className="relative flex min-h-0 flex-1">
+      {/* CHAT BODY */}
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
         <main className="flex min-w-0 flex-1 flex-col">
-          {/* Conversation status */}
-
-          <div className="flex shrink-0 items-center justify-center border-b border-slate-100 px-4 py-2.5">
-            <div className="flex items-center gap-2 rounded-full border border-slate-100 bg-slate-50 px-3 py-1.5 text-[10px] font-semibold text-slate-400">
-              <span
-                className={[
-                  "h-1.5 w-1.5 rounded-full",
-                  socketConnected ? "bg-emerald-500" : "bg-slate-300",
-                ].join(" ")}
-              />
-
-              {loadingMessages
-                ? "Loading..."
-                : !socketConnected
-                  ? "Reconnecting..."
-                  : "Live conversation"}
-            </div>
-          </div>
-
           {/* Messages */}
 
           <div
@@ -1342,6 +1413,7 @@ export default function ChatPage() {
             className="
               min-h-0
               flex-1
+              overflow-x-hidden
               overflow-y-auto
               bg-white
               px-4
@@ -1998,9 +2070,7 @@ export default function ChatPage() {
             )}
           </div>
 
-          {/* =================================================
-              TYPING INDICATOR
-          ================================================== */}
+          {/* TYPING INDICATOR */}
 
           {typingUsers.length > 0 && (
             <div className="border-t border-slate-100 bg-white px-4 py-2 sm:px-6">
@@ -2046,11 +2116,9 @@ export default function ChatPage() {
             </div>
           )}
 
-          {/* =================================================
-              COMPOSER
-          ================================================== */}
+          {/* COMPOSER */}
 
-          <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
+          <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-2 sm:px-6">
             <div className="mx-auto max-w-4xl">
               {/* Attachment preview */}
               {selectedFile && (
@@ -2174,7 +2242,7 @@ export default function ChatPage() {
                 </div>
               </div>
 
-              <div className="mt-1.5 flex items-center justify-between px-1 text-[10px] text-slate-400">
+              <div className="flex items-center justify-between px-1 text-[10px] text-slate-400">
                 <span>Press Enter to send · Shift + Enter for a new line</span>
 
                 {!socketConnected && (
@@ -2184,13 +2252,10 @@ export default function ChatPage() {
             </div>
           </div>
         </main>
-
-        {/* ===================================================
-            CONVERSATION INFO
-        ==================================================== */}
-
+        {/* CONVERSATION INFO */}
         {showInfo && (
           <aside
+            ref={infoPanelRef}
             className="
       absolute
       inset-y-0
@@ -2207,46 +2272,8 @@ export default function ChatPage() {
     "
           >
             <div className="flex h-full flex-col">
-              {/* Info header */}
-
-              <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-slate-200/70 px-5">
-                <div className="min-w-0">
-                  <h2 className="truncate text-lg font-black tracking-tight text-slate-950">
-                    {conversationTitle}
-                  </h2>
-
-                  {conversation?.space?.name && (
-                    <p className="mt-0.5 truncate text-[10px] font-medium text-slate-400">
-                      {conversation.space.name}
-                    </p>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowInfo(false)}
-                  className="
-            grid
-            h-8
-            w-8
-            shrink-0
-            place-items-center
-            rounded-lg
-            text-slate-400
-            transition
-            hover:bg-slate-100
-            hover:text-slate-900
-          "
-                  aria-label="Close conversation info"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
               <div className="flex-1 overflow-y-auto p-5">
-                {/* =================================================
-            PRIVATE CONVERSATION CODE
-        ================================================== */}
+                {/* PRIVATE CONVERSATION CODE */}
 
                 {conversation?.isPrivate && conversation.joinCode && (
                   <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4">
@@ -2301,9 +2328,7 @@ export default function ChatPage() {
                   </div>
                 )}
 
-                {/* =================================================
-            PARTICIPANTS
-        ================================================== */}
+                {/* PARTICIPANTS */}
 
                 <div className={conversation?.isPrivate ? "mt-6" : "mt-2"}>
                   <div className="mb-3 flex items-center justify-between">
@@ -2402,11 +2427,7 @@ export default function ChatPage() {
             </div>
           </aside>
         )}
-
-        {/* =====================================================
-    DELETE CONVERSATION CONFIRMATION
-===================================================== */}
-
+        {/* DELETE CONVERSATION CONFIRMATION */}
         {showDeleteConfirm && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center px-5">
             <button
@@ -2493,11 +2514,7 @@ export default function ChatPage() {
             </div>
           </div>
         )}
-
-        {/* =====================================================
-    LEAVE CONVERSATION CONFIRMATION
-===================================================== */}
-
+        {/* LEAVE CONVERSATION CONFIRMATION */}
         {showLeaveConfirm && (
           <div className="fixed inset-0 z-[70] flex items-center justify-center px-5">
             <button

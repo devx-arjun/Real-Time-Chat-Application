@@ -21,12 +21,10 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            guest ? <Navigate to="/home" replace /> : <WelcomePage />
-          }
+          element={guest ? <Navigate to="/home" replace /> : <WelcomePage />}
         />
 
-        <Route element={<AppLayout />}>
+        <Route element={guest ? <AppLayout /> : <Navigate to="/" replace />}>
           <Route path="/home" element={<DashboardPage />} />
           <Route path="/space/:spaceId" element={<SpacePage />} />
           <Route path="/discover" element={<DiscoverPage />} />

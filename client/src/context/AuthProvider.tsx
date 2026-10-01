@@ -17,20 +17,18 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [guest, setGuest] = useState<Guest | null>(null);
-  console.log("AUTH PROVIDER RENDER:", guest);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function restoreGuest() {
       const guestId = localStorage.getItem(GUEST_ID_KEY);
-      const username = localStorage.getItem(USERNAME_KEY);
 
       console.log("Restoring guest...");
       console.log("Stored guest ID:", guestId);
-      console.log("Stored username:", username);
 
       if (!guestId) {
         console.log("No guest ID found");
+        setGuest(null);
         setLoading(false);
         return;
       }
@@ -42,32 +40,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         setGuest(currentGuest);
 
-        // Keep username synchronized with the server.
         localStorage.setItem(USERNAME_KEY, currentGuest.username);
       } catch (error) {
-        console.error("Failed to restore guest:", error);
+        console.error("Guest does not exist or could not be restored:", error);
 
-        /*
-         * If the API fails but we still have a username,
-         * keep the basic identity available locally.
-         *
-         * This is only a fallback. Space APIs still require
-         * the guest ID.
-         */
-        if (username) {
-          const fallbackGuest: Guest = {
-            id: "",
-            guestId,
-            username,
-            bio: null,
-            avatarUrl: null,
-            createdAt: "",
-          };
+        // Remove stale authentication data.
+        localStorage.removeItem(GUEST_ID_KEY);
+        localStorage.removeItem(USERNAME_KEY);
 
-          setGuest(fallbackGuest);
-        } else {
-          setGuest(null);
-        }
+        setGuest(null);
       } finally {
         setLoading(false);
       }
@@ -88,6 +69,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     console.log("CREATE GUEST RESULT:", newGuest);
+
     localStorage.setItem(GUEST_ID_KEY, newGuest.guestId);
     localStorage.setItem(USERNAME_KEY, newGuest.username);
 

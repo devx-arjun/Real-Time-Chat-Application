@@ -13,7 +13,13 @@ function App() {
   const { guest, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <main
+        className={`flex min-h-screen items-center justify-center bg-[#f7f8fc] text-slate-950`}
+      >
+        <div className="text-sm opacity-50">Loading...</div>
+      </main>
+    );
   }
 
   return (

@@ -129,7 +129,6 @@ const accentStyles = [
 
 export default function DashboardPage() {
   const { guest } = useAuth();
-  console.log("DASHBOARD GUEST:", guest);
   const [search, setSearch] = useState("");
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [spacesLoading, setSpacesLoading] = useState(true);
@@ -245,7 +244,7 @@ export default function DashboardPage() {
       </div>
       <div className="mx-auto max-w-[1350px] px-5 pt-8 sm:px-8 lg:px-12">
         {/* Intro */}
-        <section className="relative py-8 sm:py-10 lg:py-14">
+        <section className="relative py-5 sm:py-8 lg:py-12">
           <div className="relative max-w-4xl">
             <div className="mb-5 flex items-center gap-2">
               <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -298,7 +297,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="pointer-events-none absolute -right-0 top-20 hidden select-none text-[17rem] font-black leading-[0.8] tracking-[-0.12em] text-slate-900/[0.035] lg:block">
+          <div className="pointer-events-none absolute right-0 top-20 select-none text-[17rem] font-black leading-[0.8] tracking-[-0.12em] text-slate-900/[0.045] sm:text-slate-900/[0.035]">
             {avatarLetter}
           </div>
 
@@ -347,8 +346,8 @@ export default function DashboardPage() {
           )}
         </div>
         {/* Jump back in */}
-        <section className="mt-12">
-          <div className="mb-5 flex items-end justify-between gap-4">
+        <section className="mt-10">
+          <div className="mb-4 sm:mb-6 flex items-end justify-between gap-4">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
                 Jump back in
@@ -431,7 +430,7 @@ export default function DashboardPage() {
               })}
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/40 px-6 py-10">
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/40 px-5 sm:px-7 py-5 sm:py-10">
               <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
@@ -461,8 +460,8 @@ export default function DashboardPage() {
           )}
         </section>
         {/* Spaces */}
-        <section className="mt-14">
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <section className="mt-10 sm:mt-12">
+          <div className="mb-5 flex flex-row gap-3 items-end justify-between">
             <div>
               <div className="flex items-center gap-2">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
@@ -654,7 +653,7 @@ export default function DashboardPage() {
           </Link>
         </section>
         {/* Footer */}
-        <footer className="py-7 flex flex-col gap-3 border-t border-slate-200/70 pt-6 text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 flex-row items-center justify-between">
+        <footer className="py-7 flex flex-col gap-3 border-t border-slate-200/70 pt-6 text-[9px] font-medium uppercase tracking-[0.2em] text-slate-400 sm:flex-row items-center justify-between">
           <span>LinkUp © 2026</span>
 
           <div className="flex items-center gap-3">

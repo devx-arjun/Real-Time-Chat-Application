@@ -8,20 +8,10 @@ import WelcomePage from "./pages/WelcomePage";
 import SpacePage from "./pages/SpacePage";
 import { useAuth } from "./context/useAuth";
 import ChatPage from "./pages/ChatPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   const { guest, loading } = useAuth();
-
-  // if (loading) {
-  //   return (
-  //     <main
-  //       className={`flex h-dvh items-center justify-center bg-[#f7f8fc] text-slate-950`}
-  //     >
-  //       <div className="text-sm opacity-90">Loading...</div>
-  //     </main>
-  //   );
-  // }
-
   if (loading) {
     return (
       <main className="relative flex h-dvh items-center justify-center overflow-hidden bg-[#f7f8fc] text-slate-950">
@@ -72,6 +62,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route
           path="/"

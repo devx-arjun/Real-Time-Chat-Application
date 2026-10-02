@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 import { useAuth } from "../context/useAuth";
 import {
@@ -52,6 +52,9 @@ export default function AppLayout() {
   const [joinConversationError, setJoinConversationError] = useState<
     string | null
   >(null);
+  const location = useLocation();
+
+  const isChatPage = location.pathname.startsWith("/chat/");
 
   async function handleCreateSpace(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -386,7 +389,13 @@ export default function AppLayout() {
       </div>
 
       {/* Header */}
-      <Header />
+      {isChatPage ? (
+        <div className="hidden sm:block">
+          <Header />
+        </div>
+      ) : (
+        <Header />
+      )}
 
       {/* Page content */}
       <section className="relative z-10">

@@ -1135,6 +1135,31 @@ export default function ChatPage() {
     };
   }, [showInfo]);
 
+  useEffect(() => {
+    const viewport = window.visualViewport;
+
+    if (!viewport) {
+      return;
+    }
+
+    const updateViewportHeight = () => {
+      document.documentElement.style.setProperty(
+        "--linkup-viewport-height",
+        `${viewport.height}px`,
+      );
+    };
+
+    updateViewportHeight();
+
+    viewport.addEventListener("resize", updateViewportHeight);
+    viewport.addEventListener("scroll", updateViewportHeight);
+
+    return () => {
+      viewport.removeEventListener("resize", updateViewportHeight);
+      viewport.removeEventListener("scroll", updateViewportHeight);
+    };
+  }, []);
+
   async function handleDeleteConversation() {
     if (!conversationId || conversationActionLoading) {
       return;
@@ -1191,7 +1216,7 @@ export default function ChatPage() {
     <div
       className="
     flex
-    h-[calc(100dvh-75px)]
+    h-[var(--linkup-viewport-height,100dvh)]
     min-h-0
     flex-col
     overflow-hidden
@@ -1199,11 +1224,13 @@ export default function ChatPage() {
     border-0
     bg-white
     shadow-none
-    sm:h-[calc(100dvh-75px)]
+
+    sm:h-[calc(100dvh-70px)]
     sm:rounded-[26px]
     sm:border
     sm:border-slate-200/80
     sm:shadow-[0_18px_60px_rgba(15,23,42,0.07)]
+
     md:h-[calc(100dvh-90px)]
   "
     >

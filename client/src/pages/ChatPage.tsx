@@ -139,11 +139,6 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
 
   const [socketConnected, setSocketConnected] = useState(socket.isConnected());
-  const [socketStatus, setSocketStatus] =
-    useState<SocketStatus>("disconnected");
-
-  const [showConnectionRestored, setShowConnectionRestored] = useState(false);
-
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
     null,
   );
@@ -827,12 +822,6 @@ export default function ChatPage() {
     socket.joinConversation(conversationId);
   }, [guestId, conversationId, isParticipant]);
 
-  /*
-   * =========================================================
-   * SCROLL TO NEW MESSAGE
-   * =========================================================
-   */
-
   useEffect(() => {
     if (!shouldScrollToBottomRef.current) {
       return;
@@ -846,12 +835,6 @@ export default function ChatPage() {
       shouldScrollToBottomRef.current = false;
     });
   }, [messages.length]);
-
-  /*
-   * =========================================================
-   * TYPING
-   * =========================================================
-   */
 
   const handleTyping = (value: string) => {
     setMessage(value);

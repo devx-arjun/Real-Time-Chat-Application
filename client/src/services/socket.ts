@@ -447,14 +447,6 @@ type ErrorListener = (message: string) => void;
 type AuthListener = () => void;
 type ConnectionListener = (connected: boolean) => void;
 
-export type SocketStatus =
-  | "connecting"
-  | "connected"
-  | "reconnecting"
-  | "disconnected";
-
-type StatusListener = (status: SocketStatus) => void;
-
 class LinkUpSocket {
   private socket: WebSocket | null = null;
   private guestId: string | null = null;
@@ -464,14 +456,12 @@ class LinkUpSocket {
   private authTimer: number | null = null;
   private reconnectAttempts = 0;
   private manuallyDisconnected = false;
-  private status: SocketStatus = "disconnected";
   private joinedConversations = new Set<string>();
 
   private messageListeners = new Set<MessageListener>();
   private authListeners = new Set<AuthListener>();
   private errorListeners = new Set<ErrorListener>();
   private connectionListeners = new Set<ConnectionListener>();
-  private statusListeners = new Set<StatusListener>();
 
   /**
    * Connect to the backend WebSocket server.
@@ -525,8 +515,6 @@ class LinkUpSocket {
       isReconnect ? "Reconnecting WebSocket:" : "Connecting WebSocket:",
       wsUrl,
     );
-
-    this.setStatus(isReconnect ? "reconnecting" : "connecting");
 
     const ws = new WebSocket(wsUrl);
 
@@ -582,8 +570,6 @@ class LinkUpSocket {
            * authentication.
            */
           this.reconnectAttempts = 0;
-
-          this.setStatus("connected");
           this.notifyConnection(true);
 
           console.log("WebSocket authenticated");
@@ -661,7 +647,6 @@ class LinkUpSocket {
       this.notifyConnection(false);
 
       if (this.manuallyDisconnected) {
-        this.setStatus("disconnected");
         return;
       }
 
@@ -691,8 +676,6 @@ class LinkUpSocket {
     }
 
     this.reconnectAttempts = 0;
-
-    this.setStatus("disconnected");
     this.notifyConnection(false);
   }
 
@@ -722,8 +705,6 @@ class LinkUpSocket {
     );
 
     this.reconnectAttempts += 1;
-
-    this.setStatus("reconnecting");
 
     console.log(
       `WebSocket reconnecting in ${delay / 1000}s...`,
@@ -975,22 +956,6 @@ class LinkUpSocket {
   }
 
   /**
-   * Subscribe to detailed connection status.
-   */
-  onStatusChange(listener: StatusListener) {
-    this.statusListeners.add(listener);
-
-    /*
-     * Immediately provide the current status.
-     */
-    listener(this.status);
-
-    return () => {
-      this.statusListeners.delete(listener);
-    };
-  }
-
-  /**
    * Check whether the WebSocket transport is connected.
    */
   isConnected() {
@@ -1004,30 +969,9 @@ class LinkUpSocket {
     return this.authenticated;
   }
 
-  /**
-   * Get the current connection status.
-   */
-  getStatus() {
-    return this.status;
-  }
-
   private notifyConnection(connected: boolean) {
     this.connectionListeners.forEach((listener) => {
       listener(connected);
-    });
-  }
-
-  private setStatus(status: SocketStatus) {
-    if (this.status === status) {
-      return;
-    }
-
-    this.status = status;
-
-    console.log("WebSocket status:", status);
-
-    this.statusListeners.forEach((listener) => {
-      listener(status);
     });
   }
 

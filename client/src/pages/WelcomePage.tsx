@@ -267,7 +267,7 @@ export default function WelcomePage() {
                       className={`group flex w-full cursor-pointer items-center justify-between rounded-2xl px-5 py-4 text-sm font-semibold transition duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 bg-slate-950 text-white shadow-sm hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-500/20`}
                     >
                       <span>
-                        {loading ? "Setting things up..." : "Join LinkUp"}
+                        {loading ? "Joining" : "Join LinkUp"}
                       </span>
 
                       <span className="text-lg transition-transform duration-200 group-hover:translate-x-1">

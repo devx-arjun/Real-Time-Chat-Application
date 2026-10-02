@@ -14,12 +14,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-    networks:
-      - linkup-network
-
-networks:
-  linkup-network:
-    driver: bridge
-
 volumes:
   postgres_data:

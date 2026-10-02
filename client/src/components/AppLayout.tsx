@@ -296,7 +296,7 @@ export default function AppLayout() {
   ]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f7f8fc] text-slate-950">
+    <main className="relative min-h-dvh overflow-hidden bg-[#f7f8fc] text-slate-950">
       {/* Global background atmosphere */}
       <div className="pointer-events-none fixed inset-0 -z-10 min-h-screen">
         <div

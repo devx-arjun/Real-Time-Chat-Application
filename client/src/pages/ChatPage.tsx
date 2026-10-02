@@ -139,6 +139,10 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
 
   const [socketConnected, setSocketConnected] = useState(socket.isConnected());
+  const [socketStatus, setSocketStatus] =
+    useState<SocketStatus>("disconnected");
+
+  const [showConnectionRestored, setShowConnectionRestored] = useState(false);
 
   const [deletingMessageId, setDeletingMessageId] = useState<string | null>(
     null,
@@ -800,7 +804,9 @@ export default function ChatPage() {
       unsubscribeMessages();
       unsubscribeErrors();
 
-      socket.leaveConversation(conversationId);
+      if (isParticipantRef.current === true) {
+        socket.leaveConversation(conversationId);
+      }
     };
   }, [guestId, conversationId, currentUserId]);
 
@@ -1101,6 +1107,10 @@ export default function ChatPage() {
       }
 
       setShowMoreMenu(false);
+      setShowInfo(false);
+      setShowEmojiPicker(false);
+      setOpenMessageMenuId(null);
+      setOpenReactionMessageId(null);
 
       if (!conversationActionLoading) {
         setShowDeleteConfirm(false);
@@ -1195,9 +1205,27 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-75px)] md:h-[calc(100vh-90px)] min-h-0 flex-col overflow-hidden rounded-[26px] border border-slate-200/80 bg-white shadow-[0_18px_60px_rgba(15,23,42,0.07)]">
+    <div
+      className="
+    flex
+    h-[calc(100dvh-75px)]
+    min-h-0
+    flex-col
+    overflow-hidden
+    rounded-none
+    border-0
+    bg-white
+    shadow-none
+    sm:h-[calc(100dvh-75px)]
+    sm:rounded-[26px]
+    sm:border
+    sm:border-slate-200/80
+    sm:shadow-[0_18px_60px_rgba(15,23,42,0.07)]
+    md:h-[calc(100dvh-90px)]
+  "
+    >
       {/* CHAT HEADER */}
-      <header className="flex h-[65px] shrink-0 items-center justify-between border-b border-slate-200/70 bg-white px-4 sm:px-6">
+      <header className="flex h-[62px] shrink-0 items-center justify-between border-b border-slate-200/70 bg-white px-3.5 sm:h-[65px] sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Link
             to={
@@ -1222,8 +1250,7 @@ export default function ChatPage() {
           <div
             className="
               grid
-              h-10
-              w-10
+             h-9 w-9 sm:h-10 sm:w-10
               shrink-0
               place-items-center
               rounded-[13px]
@@ -1241,32 +1268,52 @@ export default function ChatPage() {
           </div>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
+            {/* Conversation name + connection status */}
+            <div className="flex min-w-0 items-center gap-2">
               <h1 className="truncate text-sm font-black tracking-tight text-slate-950">
                 {conversationTitle}
               </h1>
 
-              <span
+              <div
                 className={[
-                  "hidden h-1.5 w-1.5 rounded-full sm:block",
-                  socketConnected ? "bg-emerald-500" : "bg-slate-300",
+                  "flex shrink-0 items-center gap-1 text-[9px] font-semibold sm:text-[10px]",
+                  socketConnected ? "text-emerald-600" : "text-amber-600",
                 ].join(" ")}
-              />
+              >
+                <span
+                  className={[
+                    "h-1.5 w-1.5 rounded-full",
+                    socketConnected
+                      ? "bg-emerald-500"
+                      : "animate-pulse bg-amber-400",
+                  ].join(" ")}
+                />
+
+                <span>{socketConnected ? "Connected" : "Reconnecting..."}</span>
+              </div>
             </div>
 
-            <div className="mt-0.5 flex items-center gap-2 text-[10px] font-medium text-slate-400">
-              {conversation?.space?.name && (
+            {/* Space + participant count */}
+            <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] font-medium text-slate-400 sm:text-[11px]">
+              {conversation?.space?.name ? (
                 <>
-                  <span className="truncate">{conversation.space.name}</span>
+                  <span className="max-w-[120px] truncate">
+                    {conversation.space.name}
+                  </span>
 
-                  <span className="h-1 w-1 rounded-full bg-slate-300" />
+                  <span className="h-1 w-1 shrink-0 rounded-full bg-slate-300" />
+
+                  <span className="shrink-0">
+                    {participantCount}{" "}
+                    {participantCount === 1 ? "participant" : "participants"}
+                  </span>
                 </>
+              ) : (
+                <span>
+                  {participantCount}{" "}
+                  {participantCount === 1 ? "participant" : "participants"}
+                </span>
               )}
-
-              <span>
-                {participantCount}{" "}
-                {participantCount === 1 ? "participant" : "participants"}
-              </span>
             </div>
           </div>
         </div>
@@ -1401,6 +1448,7 @@ export default function ChatPage() {
           </div>
         </div>
       </header>
+
       {/* CHAT BODY */}
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         <main className="flex min-w-0 flex-1 flex-col">
@@ -1410,15 +1458,18 @@ export default function ChatPage() {
             ref={messagesContainerRef}
             onScroll={handleMessagesScroll}
             className="
-              min-h-0
-              flex-1
-              overflow-x-hidden
-              overflow-y-auto
-              bg-white
-              px-4
-              py-6
-              sm:px-8
-            "
+  min-h-0
+  flex-1
+  overflow-x-hidden
+  overflow-y-auto
+  overscroll-contain
+  bg-white
+  px-3
+  py-4
+  sm:px-6
+  sm:py-6
+  lg:px-8
+"
           >
             {loadingMessages ? (
               <div className="mx-auto flex max-w-3xl flex-col gap-5">
@@ -1595,7 +1646,7 @@ export default function ChatPage() {
 
                       <div
                         className={[
-                          "flex max-w-[78%] flex-col sm:max-w-[68%]",
+                          "flex max-w-[88%] flex-col sm:max-w-[72%] lg:max-w-[68%]",
                           mine ? "items-end" : "items-start",
                         ].join(" ")}
                       >
@@ -2117,7 +2168,19 @@ export default function ChatPage() {
 
           {/* COMPOSER */}
 
-          <div className="shrink-0 border-t border-slate-200 bg-white px-4 py-2 sm:px-6">
+          <div
+            className="
+    shrink-0
+    border-t
+    border-slate-200
+    bg-white
+    px-3
+    py-2
+    pb-[max(0.5rem,env(safe-area-inset-bottom))]
+    sm:px-6
+    sm:py-2
+  "
+          >
             <div className="mx-auto max-w-4xl">
               {/* Attachment preview */}
               {selectedFile && (
@@ -2152,7 +2215,22 @@ export default function ChatPage() {
               <div className="relative">
                 {/* Emoji picker */}
                 {showEmojiPicker && (
-                  <div className="absolute bottom-14 right-10 z-50 w-64 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                  <div
+                    className="
+  absolute
+  bottom-14
+  right-0
+  z-50
+  w-[min(280px,calc(100vw-24px))]
+  rounded-2xl
+  border
+  border-slate-200
+  bg-white
+  p-3
+  shadow-xl
+  sm:right-10
+"
+                  >
                     <div className="mb-2 flex items-center justify-between">
                       <span className="text-xs font-semibold text-slate-600">
                         Emojis
@@ -2210,7 +2288,20 @@ export default function ChatPage() {
                     onKeyDown={handleKeyDown}
                     rows={1}
                     placeholder="Write a message..."
-                    className="max-h-32 min-h-9 flex-1 resize-none bg-transparent px-1 py-2 text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                    className="
+  max-h-32
+  min-h-9
+  flex-1
+  resize-none
+  bg-transparent
+  px-1
+  py-2
+  text-base
+  text-slate-900
+  outline-none
+  placeholder:text-slate-400
+  sm:text-sm
+"
                   />
 
                   {/* Emoji */}
@@ -2242,8 +2333,9 @@ export default function ChatPage() {
               </div>
 
               <div className="flex items-center justify-between px-1 text-[10px] text-slate-400">
-                <span>Press Enter to send · Shift + Enter for a new line</span>
-
+                <span className="hidden sm:inline">
+                  Press Enter to send · Shift + Enter for a new line
+                </span>
                 {!socketConnected && (
                   <span className="text-amber-500">Reconnecting...</span>
                 )}
@@ -2253,44 +2345,50 @@ export default function ChatPage() {
         </main>
         {/* CONVERSATION INFO */}
         {showInfo && (
-          <aside
-            ref={infoPanelRef}
-            className="
-      absolute
-      inset-y-0
-      right-0
-      z-20
-      w-[290px]
-      border-l
-      border-slate-200
-      bg-white
-      shadow-2xl
-      shadow-slate-950/10
-      sm:relative
-      sm:shadow-none
-    "
-          >
-            <div className="flex h-full flex-col">
-              <div className="flex-1 overflow-y-auto p-5">
-                {/* PRIVATE CONVERSATION CODE */}
+          <>
+            <div
+              className="absolute inset-0 z-10 bg-slate-950/20 backdrop-blur-[1px] sm:hidden"
+              onClick={() => setShowInfo(false)}
+            />
+            <aside
+              ref={infoPanelRef}
+              className="
+    absolute
+    inset-y-0
+    right-0
+    z-20
+    w-[min(88vw,320px)]
+    border-l
+    border-slate-200
+    bg-white
+    shadow-2xl
+    shadow-slate-950/10
+    sm:relative
+    sm:w-[290px]
+    sm:shadow-none
+  "
+            >
+              <div className="flex h-full flex-col">
+                <div className="flex-1 overflow-y-auto p-5">
+                  {/* PRIVATE CONVERSATION CODE */}
 
-                {conversation?.isPrivate && conversation.joinCode && (
-                  <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-500">
-                          Private invite code
-                        </p>
+                  {conversation?.isPrivate && conversation.joinCode && (
+                    <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-violet-500">
+                            Private invite code
+                          </p>
 
-                        <p className="mt-2 break-all font-mono text-xl font-black tracking-[0.2em] text-slate-950">
-                          {conversation.joinCode}
-                        </p>
-                      </div>
+                          <p className="mt-2 break-all font-mono text-xl font-black tracking-[0.2em] text-slate-950">
+                            {conversation.joinCode}
+                          </p>
+                        </div>
 
-                      <button
-                        type="button"
-                        onClick={() => void handleCopyJoinCode()}
-                        className="
+                        <button
+                          type="button"
+                          onClick={() => void handleCopyJoinCode()}
+                          className="
                   grid
                   h-9
                   w-9
@@ -2304,57 +2402,61 @@ export default function ChatPage() {
                   hover:bg-slate-950
                   hover:text-white
                 "
-                        aria-label={
-                          codeCopied
-                            ? "Conversation code copied"
-                            : "Copy conversation code"
-                        }
-                        title={codeCopied ? "Copied" : "Copy code"}
-                      >
-                        {codeCopied ? <Check size={15} /> : <Copy size={15} />}
-                      </button>
+                          aria-label={
+                            codeCopied
+                              ? "Conversation code copied"
+                              : "Copy conversation code"
+                          }
+                          title={codeCopied ? "Copied" : "Copy code"}
+                        >
+                          {codeCopied ? (
+                            <Check size={15} />
+                          ) : (
+                            <Copy size={15} />
+                          )}
+                        </button>
+                      </div>
+
+                      <p className="mt-2 text-[10px] leading-4 text-violet-500/80">
+                        Share this code with people you want to invite.
+                      </p>
+
+                      {codeCopied && (
+                        <p className="mt-2 text-[10px] font-semibold text-emerald-600">
+                          Invite code copied!
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* PARTICIPANTS */}
+
+                  <div className={conversation?.isPrivate ? "mt-6" : "mt-2"}>
+                    <div className="mb-3 flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
+                          Participants
+                        </p>
+
+                        <p className="mt-1 text-xs font-semibold text-slate-800">
+                          {participantCount}{" "}
+                          {participantCount === 1 ? "person" : "people"}
+                        </p>
+                      </div>
+
+                      <Users size={16} className="text-violet-500" />
                     </div>
 
-                    <p className="mt-2 text-[10px] leading-4 text-violet-500/80">
-                      Share this code with people you want to invite.
-                    </p>
+                    <div className="space-y-1">
+                      {conversation?.participants?.length ? (
+                        conversation.participants.map((participant) => {
+                          const user = participant.user;
+                          const isCurrentUser = user.id === currentUserId;
 
-                    {codeCopied && (
-                      <p className="mt-2 text-[10px] font-semibold text-emerald-600">
-                        Invite code copied!
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* PARTICIPANTS */}
-
-                <div className={conversation?.isPrivate ? "mt-6" : "mt-2"}>
-                  <div className="mb-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">
-                        Participants
-                      </p>
-
-                      <p className="mt-1 text-xs font-semibold text-slate-800">
-                        {participantCount}{" "}
-                        {participantCount === 1 ? "person" : "people"}
-                      </p>
-                    </div>
-
-                    <Users size={16} className="text-violet-500" />
-                  </div>
-
-                  <div className="space-y-1">
-                    {conversation?.participants?.length ? (
-                      conversation.participants.map((participant) => {
-                        const user = participant.user;
-                        const isCurrentUser = user.id === currentUserId;
-
-                        return (
-                          <div
-                            key={participant.id}
-                            className="
+                          return (
+                            <div
+                              key={participant.id}
+                              className="
                       flex
                       items-center
                       gap-3
@@ -2364,11 +2466,11 @@ export default function ChatPage() {
                       transition
                       hover:bg-slate-50
                     "
-                          >
-                            {/* Avatar */}
+                            >
+                              {/* Avatar */}
 
-                            <div
-                              className="
+                              <div
+                                className="
                         grid
                         h-9
                         w-9
@@ -2383,48 +2485,49 @@ export default function ChatPage() {
                         font-black
                         text-white
                       "
-                            >
-                              {user.avatarUrl ? (
-                                <img
-                                  src={user.avatarUrl}
-                                  alt=""
-                                  className="h-full w-full object-cover"
-                                />
-                              ) : (
-                                user.username.charAt(0).toUpperCase()
-                              )}
-                            </div>
-
-                            {/* User info */}
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex min-w-0 items-center gap-1.5">
-                                <p className="truncate text-xs font-bold text-slate-800">
-                                  {user.username}
-                                </p>
-
-                                {isCurrentUser && (
-                                  <span className="shrink-0 text-[9px] font-semibold text-violet-500">
-                                    You
-                                  </span>
+                              >
+                                {user.avatarUrl ? (
+                                  <img
+                                    src={user.avatarUrl}
+                                    alt=""
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  user.username.charAt(0).toUpperCase()
                                 )}
                               </div>
+
+                              {/* User info */}
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex min-w-0 items-center gap-1.5">
+                                  <p className="truncate text-xs font-bold text-slate-800">
+                                    {user.username}
+                                  </p>
+
+                                  {isCurrentUser && (
+                                    <span className="shrink-0 text-[9px] font-semibold text-violet-500">
+                                      You
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center">
-                        <p className="text-[10px] font-medium text-slate-400">
-                          No participants found.
-                        </p>
-                      </div>
-                    )}
+                          );
+                        })
+                      ) : (
+                        <div className="rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center">
+                          <p className="text-[10px] font-medium text-slate-400">
+                            No participants found.
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </aside>
+            </aside>
+          </>
         )}
         {/* DELETE CONVERSATION CONFIRMATION */}
         {showDeleteConfirm && (

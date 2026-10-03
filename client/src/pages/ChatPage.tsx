@@ -1198,12 +1198,22 @@ export default function ChatPage() {
     <div
       className="
     flex
-    h-full
+    h-[var(--linkup-viewport-height,100dvh)]
     min-h-0
-    w-full
     flex-col
     overflow-hidden
+    rounded-none
+    border-0
     bg-white
+    shadow-none
+
+    sm:h-[calc(100dvh-70px)]
+    sm:rounded-[26px]
+    sm:border
+    sm:border-slate-200/80
+    sm:shadow-[0_18px_60px_rgba(15,23,42,0.07)]
+
+    md:h-[calc(100dvh-90px)]
   "
     >
       {/* CHAT HEADER */}

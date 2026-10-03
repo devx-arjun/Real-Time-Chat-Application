@@ -6,7 +6,6 @@ import {
   MessageCircle,
   Plus,
   UserRound,
-  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -36,7 +35,6 @@ export default function Header() {
 
   const createMenuRef = useRef<HTMLDivElement | null>(null);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const username = guest?.username || "Guest";
   const avatarLetter = username.charAt(0).toUpperCase() || "L";

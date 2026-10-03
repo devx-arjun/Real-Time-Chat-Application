@@ -175,7 +175,7 @@ class LinkUpSocket {
       console.error("WebSocket error:", error);
     };
 
-    ws.onclose = (event) => {
+    ws.onclose = () => {
       /*
        * Ignore close events from an old socket instance.
        */

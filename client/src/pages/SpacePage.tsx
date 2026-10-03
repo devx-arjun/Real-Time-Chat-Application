@@ -240,7 +240,7 @@ export default function SpacePage() {
   return (
     <main className="min-h-screen bg-[#f7f8fc] text-slate-950">
       <div className="mx-auto min-h-screen max-w-[1400px] px-5 sm:px-8 lg:px-10">
-        <header className="flex h-20 items-center justify-between">
+        <header className="flex h-14 sm:h-20 items-center justify-between">
           <Link
             to="/home"
             className="text-sm font-medium text-slate-500 transition hover:text-violet-600"
@@ -251,7 +251,7 @@ export default function SpacePage() {
 
         {/* Space Header */}
         <section className="py-10 pt-4">
-          <div className="rounded-[32px] border border-slate-200 bg-white/70 p-8 shadow-[0_15px_50px_rgba(30,20,60,0.04)] sm:p-10">
+          <div className="rounded-[32px] border border-slate-200 bg-white/70 p-5 sm:p-8 shadow-[0_15px_50px_rgba(30,20,60,0.04)] sm:p-10">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-violet-600">

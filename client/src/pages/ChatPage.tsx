@@ -203,7 +203,7 @@ export default function ChatPage() {
   }, [isParticipant]);
 
   const conversationTitle =
-    conversation?.title || conversation?.space?.name || "Conversation";
+    conversation?.title || conversation?.space?.name || "";
 
   const participantCount = conversation?._count?.participants ?? 0;
 
@@ -1461,7 +1461,7 @@ export default function ChatPage() {
 
       {/* CHAT BODY */}
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
-        <main className="flex min-w-0 flex-1 flex-col">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           {/* Messages */}
 
           <div
@@ -2346,9 +2346,6 @@ export default function ChatPage() {
                 <span className="hidden sm:inline">
                   Press Enter to send · Shift + Enter for a new line
                 </span>
-                {!socketConnected && (
-                  <span className="text-amber-500">Reconnecting...</span>
-                )}
               </div>
             </div>
           </div>

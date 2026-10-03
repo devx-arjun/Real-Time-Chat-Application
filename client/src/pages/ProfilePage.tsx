@@ -52,7 +52,6 @@ export default function ProfilePage() {
         setLoading(true);
         setError(null);
         const response = await api.get<ProfileResponse>("/profile");
-        console.log("PROFILE RESPONSE:", response.data);
         setProfile(response.data);
       } catch (error) {
         console.error("Failed to load profile:", error);
@@ -99,7 +98,6 @@ export default function ProfilePage() {
   }
 
   const { user, stats, rooms, activity } = profile;
-  console.log("User: ", user);
 
   const initials = user.username.charAt(0).toUpperCase();
 

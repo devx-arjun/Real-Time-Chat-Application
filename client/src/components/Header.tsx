@@ -5,7 +5,6 @@ import {
   Home,
   MessageCircle,
   Plus,
-  Search,
   UserRound,
   X,
 } from "lucide-react";
@@ -34,7 +33,6 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const createMenuRef = useRef<HTMLDivElement | null>(null);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -57,28 +55,10 @@ export default function Header() {
     setProfileOpen(false);
   }
 
-  function handleSearch() {
-    setSearchOpen(true);
-    setMenuOpen(false);
-    setCreateOpen(false);
-    setProfileOpen(false);
-
-    window.dispatchEvent(new CustomEvent("linkup:search"));
-
-    window.setTimeout(() => {
-      searchInputRef.current?.focus();
-    }, 50);
-  }
-
-  function closeSearch() {
-    setSearchOpen(false);
-  }
-
   function handleCreate() {
     setCreateOpen((current) => !current);
     setMenuOpen(false);
     setProfileOpen(false);
-    setSearchOpen(false);
   }
 
   function openCreateSpace() {
@@ -100,7 +80,6 @@ export default function Header() {
     setProfileOpen((current) => !current);
     setMenuOpen(false);
     setCreateOpen(false);
-    setSearchOpen(false);
   }
 
   useEffect(() => {
@@ -114,14 +93,12 @@ export default function Header() {
 
       if (event.key === "/" && !isTyping) {
         event.preventDefault();
-        handleSearch();
       }
 
       if (event.key === "Escape") {
         setMenuOpen(false);
         setCreateOpen(false);
         setProfileOpen(false);
-        setSearchOpen(false);
       }
     }
 
@@ -151,11 +128,6 @@ export default function Header() {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, []);
-
-  useEffect(() => {
-    closeAllMenus();
-    setSearchOpen(false);
-  }, [location.pathname]);
 
   return (
     <header
@@ -346,83 +318,6 @@ export default function Header() {
 
         {/* Right Side */}
         <div className="hidden items-center gap-2 md:flex">
-          {/* Search */}
-          {searchOpen ? (
-            <div
-              className="
-                flex
-                h-10
-                w-[230px]
-                items-center
-                gap-2
-                rounded-full
-                border
-                border-zinc-200
-                bg-zinc-50
-                px-4
-                transition
-                focus-within:border-zinc-300
-                focus-within:bg-white
-              "
-            >
-              <Search
-                size={15}
-                strokeWidth={1.8}
-                className="shrink-0 text-zinc-400"
-              />
-
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search LinkUp..."
-                className="
-                  min-w-0
-                  flex-1
-                  bg-transparent
-                  text-sm
-                  font-medium
-                  text-zinc-800
-                  outline-none
-                  placeholder:text-zinc-400
-                "
-                onChange={(event) => {
-                  window.dispatchEvent(
-                    new CustomEvent("linkup:search-query", {
-                      detail: event.target.value,
-                    }),
-                  );
-                }}
-              />
-
-              <button
-                type="button"
-                onClick={closeSearch}
-                aria-label="Close search"
-                className="text-zinc-400 transition hover:text-zinc-800"
-              >
-                <X size={15} />
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSearch}
-              aria-label="Search LinkUp"
-              className="
-                grid
-                h-10
-                w-10
-                place-items-center
-                rounded-full
-                text-zinc-500
-                transition
-                hover:bg-zinc-100
-                hover:text-zinc-900
-              "
-            >
-              <Search size={18} strokeWidth={1.8} />
-            </button>
-          )}
 
           {/* Profile */}
           <div ref={profileMenuRef} className="relative">
@@ -585,24 +480,6 @@ export default function Header() {
 
         {/* Mobile Controls */}
         <div className="flex items-center gap-2 md:hidden">
-          <button
-            type="button"
-            onClick={handleSearch}
-            aria-label="Search LinkUp"
-            className="
-              grid
-              h-9
-              w-9
-              place-items-center
-              rounded-full
-              text-zinc-500
-              transition
-              hover:bg-zinc-100
-              hover:text-zinc-900
-            "
-          >
-            <Search size={18} strokeWidth={1.8} />
-          </button>
 
           <button
             type="button"
@@ -828,47 +705,6 @@ export default function Header() {
           </div>
         )}
       </nav>
-
-      {/* Mobile search overlay */}
-      {searchOpen && (
-        <div className="border-t border-zinc-100 bg-white px-5 pb-4 md:hidden">
-          <div className="flex h-11 items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4">
-            <Search size={16} className="shrink-0 text-zinc-400" />
-
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder="Search LinkUp..."
-              className="
-                min-w-0
-                flex-1
-                bg-transparent
-                text-sm
-                font-medium
-                text-zinc-800
-                outline-none
-                placeholder:text-zinc-400
-              "
-              onChange={(event) => {
-                window.dispatchEvent(
-                  new CustomEvent("linkup:search-query", {
-                    detail: event.target.value,
-                  }),
-                );
-              }}
-            />
-
-            <button
-              type="button"
-              onClick={closeSearch}
-              aria-label="Close search"
-              className="text-zinc-400"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-      )}
     </header>
   );
 }

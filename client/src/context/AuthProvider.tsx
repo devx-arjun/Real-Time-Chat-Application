@@ -22,12 +22,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     async function restoreGuest() {
       const guestId = localStorage.getItem(GUEST_ID_KEY);
-
-      console.log("Restoring guest...");
-      console.log("Stored guest ID:", guestId);
-
       if (!guestId) {
-        console.log("No guest ID found");
         setGuest(null);
         setLoading(false);
         return;
@@ -35,8 +30,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       try {
         const currentGuest = await getGuest(guestId);
-
-        console.log("Guest restored:", currentGuest);
 
         setGuest(currentGuest);
 
@@ -67,8 +60,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const newGuest = await createGuestApi({
       username: cleanUsername,
     });
-
-    console.log("CREATE GUEST RESULT:", newGuest);
 
     localStorage.setItem(GUEST_ID_KEY, newGuest.guestId);
     localStorage.setItem(USERNAME_KEY, newGuest.username);

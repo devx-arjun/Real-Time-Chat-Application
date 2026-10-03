@@ -299,66 +299,71 @@ export default function AppLayout() {
   ]);
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-[#f7f8fc] text-slate-950">
+    <main
+      className={[
+        "relative bg-[#f7f8fc] text-slate-950",
+        isChatPage ? "h-[100dvh] overflow-hidden" : "min-h-dvh overflow-hidden",
+      ].join(" ")}
+    >
       {/* Global background atmosphere */}
       <div className="pointer-events-none fixed inset-0 -z-10 min-h-screen">
         <div
           className="
-            absolute
-            -left-[18rem]
-            -top-[18rem]
-            h-[42rem]
-            w-[42rem]
-            animate-[linkup-float_16s_ease-in-out_infinite]
-            rounded-full
-            bg-violet-400/[0.08]
-            blur-[150px]
-          "
+        absolute
+        -left-[18rem]
+        -top-[18rem]
+        h-[42rem]
+        w-[42rem]
+        animate-[linkup-float_16s_ease-in-out_infinite]
+        rounded-full
+        bg-violet-400/[0.08]
+        blur-[150px]
+      "
         />
 
         <div
           className="
-            absolute
-            -right-[18rem]
-            top-[18%]
-            h-[38rem]
-            w-[38rem]
-            animate-[linkup-float-reverse_20s_ease-in-out_infinite]
-            rounded-full
-            bg-cyan-400/[0.07]
-            blur-[160px]
-          "
+        absolute
+        -right-[18rem]
+        top-[18%]
+        h-[38rem]
+        w-[38rem]
+        animate-[linkup-float-reverse_20s_ease-in-out_infinite]
+        rounded-full
+        bg-cyan-400/[0.07]
+        blur-[160px]
+      "
         />
 
         <div
           className="
-            absolute
-            left-1/2
-            top-[65%]
-            h-[30rem]
-            w-[30rem]
-            -translate-x-1/2
-            animate-[linkup-pulse_12s_ease-in-out_infinite]
-            rounded-full
-            bg-indigo-300/[0.045]
-            blur-[150px]
-          "
+        absolute
+        left-1/2
+        top-[65%]
+        h-[30rem]
+        w-[30rem]
+        -translate-x-1/2
+        animate-[linkup-pulse_12s_ease-in-out_infinite]
+        rounded-full
+        bg-indigo-300/[0.045]
+        blur-[150px]
+      "
         />
 
         <div
           className="absolute inset-0 opacity-[0.16]"
           style={{
             backgroundImage: `
-              linear-gradient(
-                120deg,
-                transparent 0%,
-                transparent 49.3%,
-                rgba(124, 58, 237, 0.05) 49.7%,
-                rgba(124, 58, 237, 0.05) 50.3%,
-                transparent 50.7%,
-                transparent 100%
-              )
-            `,
+          linear-gradient(
+            120deg,
+            transparent 0%,
+            transparent 49.3%,
+            rgba(124, 58, 237, 0.05) 49.7%,
+            rgba(124, 58, 237, 0.05) 50.3%,
+            transparent 50.7%,
+            transparent 100%
+          )
+        `,
             backgroundSize: "52px 52px",
           }}
         />
@@ -367,16 +372,16 @@ export default function AppLayout() {
           className="absolute inset-0 opacity-[0.08]"
           style={{
             backgroundImage: `
-              linear-gradient(
-                rgba(100, 116, 139, 0.13) 1px,
-                transparent 1px
-              ),
-              linear-gradient(
-                90deg,
-                rgba(100, 116, 139, 0.13) 1px,
-                transparent 1px
-              )
-            `,
+          linear-gradient(
+            rgba(100, 116, 139, 0.13) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            90deg,
+            rgba(100, 116, 139, 0.13) 1px,
+            transparent 1px
+          )
+        `,
             backgroundSize: "80px 80px",
           }}
         />
@@ -390,7 +395,7 @@ export default function AppLayout() {
 
       {/* Header */}
       {isChatPage ? (
-        <div className="hidden sm:block">
+        <div className="hidden shrink-0 sm:block">
           <Header />
         </div>
       ) : (
@@ -398,59 +403,94 @@ export default function AppLayout() {
       )}
 
       {/* Page content */}
-      <section className="relative z-10">
-        <div className="mx-auto min-h-[calc(100vh-72px)] max-w-[1680px] px-0 sm:px-4 sm:py-2 lg:px-6 xl:px-8">
+      {isChatPage ? (
+        <section
+          className="
+      relative
+      z-10
+      h-[100dvh]
+      min-h-0
+      overflow-hidden
+      sm:h-[calc(100dvh-70px)]
+      sm:px-4
+      sm:py-2
+      lg:px-6
+      xl:px-8
+    "
+        >
           <div
             className="
-              relative
-              min-h-[calc(100vh-72px)]
-              overflow-hidden
-              bg-white
-              shadow-[0_20px_70px_rgba(15,23,42,0.06)]
-              sm:min-h-[calc(100vh-104px)]
-              sm:rounded-[28px]
-              sm:border
-              sm:border-slate-200/70
-            "
+        mx-auto
+        h-full
+        min-h-0
+        w-full
+        max-w-[1680px]
+        overflow-hidden
+        bg-white
+        shadow-[0_20px_70px_rgba(15,23,42,0.08)]
+        sm:rounded-[28px]
+        sm:border
+        sm:border-slate-200/80
+      "
           >
-            <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-violet-200/70 to-transparent" />
+            <Outlet />
+          </div>
+        </section>
+      ) : (
+        <section className="relative z-10">
+          <div className="mx-auto min-h-[calc(100vh-72px)] max-w-[1680px] px-0 sm:px-4 sm:py-2 lg:px-6 xl:px-8">
+            <div
+              className="
+                relative
+                min-h-[calc(100vh-72px)]
+                overflow-hidden
+                bg-white
+                shadow-[0_20px_70px_rgba(15,23,42,0.06)]
+                sm:min-h-[calc(100vh-104px)]
+                sm:rounded-[28px]
+                sm:border
+                sm:border-slate-200/70
+              "
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-px bg-gradient-to-r from-transparent via-violet-200/70 to-transparent" />
 
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <div
-                className="
-                  absolute
-                  -right-32
-                  -top-32
-                  h-72
-                  w-72
-                  animate-[linkup-float_18s_ease-in-out_infinite]
-                  rounded-full
-                  bg-violet-200/[0.045]
-                  blur-[100px]
-                "
-              />
+              <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div
+                  className="
+                    absolute
+                    -right-32
+                    -top-32
+                    h-72
+                    w-72
+                    animate-[linkup-float_18s_ease-in-out_infinite]
+                    rounded-full
+                    bg-violet-200/[0.045]
+                    blur-[100px]
+                  "
+                />
 
-              <div
-                className="
-                  absolute
-                  -bottom-40
-                  -left-32
-                  h-80
-                  w-80
-                  animate-[linkup-float-reverse_22s_ease-in-out_infinite]
-                  rounded-full
-                  bg-cyan-200/[0.035]
-                  blur-[110px]
-                "
-              />
-            </div>
+                <div
+                  className="
+                    absolute
+                    -bottom-40
+                    -left-32
+                    h-80
+                    w-80
+                    animate-[linkup-float-reverse_22s_ease-in-out_infinite]
+                    rounded-full
+                    bg-cyan-200/[0.035]
+                    blur-[110px]
+                  "
+                />
+              </div>
 
-            <div className="relative z-10 animate-[linkup-page-in_500ms_ease-out_both]">
-              <Outlet />
+              <div className="relative z-10 animate-[linkup-page-in_500ms_ease-out_both]">
+                <Outlet />
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Start a Space */}
       {createSpaceOpen && (

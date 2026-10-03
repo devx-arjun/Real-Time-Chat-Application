@@ -73,22 +73,12 @@ class LinkUpSocket {
       .replace(/^http:/, "ws:")
       .replace(/^https:/, "wss:")
       .replace(/\/api\/?$/, "/ws");
-
-    const isReconnect = this.reconnectAttempts > 0;
-
-    console.log(
-      isReconnect ? "Reconnecting WebSocket:" : "Connecting WebSocket:",
-      wsUrl,
-    );
-
     const ws = new WebSocket(wsUrl);
 
     this.socket = ws;
     this.authenticated = false;
 
     ws.onopen = () => {
-      console.log("WebSocket transport connected");
-
       /*
        * Do not report "connected" yet.
        *
@@ -118,8 +108,6 @@ class LinkUpSocket {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data) as SocketMessage;
-        console.log("WebSocket received:", data);
-
         const type = data.type;
 
         /**
@@ -136,9 +124,6 @@ class LinkUpSocket {
            */
           this.reconnectAttempts = 0;
           this.notifyConnection(true);
-
-          console.log("WebSocket authenticated");
-
           this.authListeners.forEach((listener) => {
             listener();
           });
@@ -197,12 +182,6 @@ class LinkUpSocket {
       if (this.socket !== ws) {
         return;
       }
-
-      console.log(
-        "WebSocket disconnected",
-        event.code,
-        event.reason,
-      );
 
       this.clearAuthTimer();
 
@@ -271,10 +250,6 @@ class LinkUpSocket {
 
     this.reconnectAttempts += 1;
 
-    console.log(
-      `WebSocket reconnecting in ${delay / 1000}s...`,
-    );
-
     this.reconnectTimer = window.setTimeout(() => {
       this.reconnectTimer = null;
 
@@ -312,11 +287,6 @@ class LinkUpSocket {
     this.joinedConversations.add(conversationId);
 
     if (!this.authenticated) {
-      console.log(
-        "Conversation queued until WebSocket authentication:",
-        conversationId,
-      );
-
       return true;
     }
 

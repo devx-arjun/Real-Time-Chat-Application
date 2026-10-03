@@ -86,7 +86,6 @@ export function setupWebSocket(server: HttpServer) {
   });
 
   wss.on("connection", (socket) => {
-    console.log("WebSocket client connected");
 
     let userId: string | null = null;
     let authenticatedGuestId: string | null = null;
@@ -162,11 +161,6 @@ export function setupWebSocket(server: HttpServer) {
 
           addConnection(user.id, socket);
 
-          console.log("WebSocket authenticated:", {
-            userId: user.id,
-            guestId: user.guestId,
-          });
-
           send(socket, {
             type: "auth:success",
             user,
@@ -233,9 +227,6 @@ export function setupWebSocket(server: HttpServer) {
 
           joinConversation(conversationId, socket);
           joinedConversations.add(conversationId);
-
-          console.log("Joined conversation:", conversationId);
-
           send(socket, {
             type: "conversation:joined",
             conversationId,
@@ -448,12 +439,6 @@ export function setupWebSocket(server: HttpServer) {
             return;
           }
 
-          console.log("Creating message:", {
-            guestId: authenticatedGuestId,
-            conversationId,
-            content,
-          });
-
           // IMPORTANT:
           // createMessage expects guestId, NOT userId.
           const result = await createMessage(
@@ -462,9 +447,6 @@ export function setupWebSocket(server: HttpServer) {
             content,
             data.replyToId,
           );
-
-          console.log("CREATE MESSAGE RESULT:", result);
-
           if (result.error === "GUEST_NOT_FOUND") {
             send(socket, {
               type: "error",
@@ -513,12 +495,6 @@ export function setupWebSocket(server: HttpServer) {
 
             return;
           }
-
-          console.log("BROADCASTING NEW MESSAGE:", {
-            conversationId,
-            messageId: result.message.id,
-            content: result.message.content,
-          });
 
           broadcastToConversation(conversationId, {
             type: "message:new",
@@ -897,10 +873,6 @@ export function setupWebSocket(server: HttpServer) {
       if (userId) {
         removeConnection(userId, socket);
       }
-
-      console.log(
-        `WebSocket disconnected: ${authenticatedGuestId ?? "unknown"}`,
-      );
     });
 
     // --------------------------------------------------
@@ -911,8 +883,6 @@ export function setupWebSocket(server: HttpServer) {
       console.error("WebSocket error:", error);
     });
   });
-
-  console.log("WebSocket server running on /ws");
 
   return wss;
 }

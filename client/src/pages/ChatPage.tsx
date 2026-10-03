@@ -506,22 +506,12 @@ export default function ChatPage() {
     if (!guestId || !conversationId) {
       return;
     }
-
-    console.log("Setting up WebSocket for conversation:", conversationId);
-
     const unsubscribeConnection = socket.onConnectionChange((connected) => {
       setSocketConnected(connected);
     });
 
     const unsubscribeAuth = socket.onAuthenticated(() => {
-      console.log("WebSocket authenticated:", conversationId);
-
       if (isParticipantRef.current === true) {
-        console.log(
-          "Participant confirmed. Joining conversation:",
-          conversationId,
-        );
-
         socket.joinConversation(conversationId);
       }
     });
@@ -640,7 +630,6 @@ export default function ChatPage() {
        */
 
       if (data.type === "conversation:joined") {
-        console.log("Joined conversation:", data.conversationId);
         return;
       }
 
@@ -792,8 +781,6 @@ export default function ChatPage() {
     socket.connect(guestId);
 
     return () => {
-      console.log("Cleaning up WebSocket conversation:", conversationId);
-
       unsubscribeConnection();
       unsubscribeAuth();
       unsubscribeMessages();
@@ -813,11 +800,6 @@ export default function ChatPage() {
     if (!socket.isAuthenticated()) {
       return;
     }
-
-    console.log(
-      "Participant confirmed. Joining WebSocket conversation:",
-      conversationId,
-    );
 
     socket.joinConversation(conversationId);
   }, [guestId, conversationId, isParticipant]);
@@ -1216,22 +1198,12 @@ export default function ChatPage() {
     <div
       className="
     flex
-    h-[var(--linkup-viewport-height,100dvh)]
+    h-full
     min-h-0
+    w-full
     flex-col
     overflow-hidden
-    rounded-none
-    border-0
     bg-white
-    shadow-none
-
-    sm:h-[calc(100dvh-70px)]
-    sm:rounded-[26px]
-    sm:border
-    sm:border-slate-200/80
-    sm:shadow-[0_18px_60px_rgba(15,23,42,0.07)]
-
-    md:h-[calc(100dvh-90px)]
   "
     >
       {/* CHAT HEADER */}
@@ -1299,7 +1271,9 @@ export default function ChatPage() {
                   ].join(" ")}
                 />
 
-                <span>{socketConnected ? "Connected" : "Reconnecting..."}</span>
+                <span className="hidden sm:inline">
+                  {socketConnected ? "Connected" : "Reconnecting..."}
+                </span>
               </div>
             </div>
 
@@ -2375,8 +2349,8 @@ export default function ChatPage() {
     sm:shadow-none
   "
             >
-              <div className="flex h-full flex-col">
-                <div className="flex-1 overflow-y-auto p-5">
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="min-h-0 flex-1 overflow-y-auto p-5">
                   {/* PRIVATE CONVERSATION CODE */}
 
                   {conversation?.isPrivate && conversation.joinCode && (
